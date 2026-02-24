@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Fragment } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -227,31 +227,44 @@ export default function ImpactMapClient() {
           <LegendControl />
           {WALL_ROUTE_LAYERS.map((layer) => {
             const statusLabel = layer.status.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-            return layer.segments.map((seg, i) => (
-              <Polyline
-                key={`${layer.status}-${i}`}
-                positions={seg.coords}
-                pathOptions={{
-                  color: layer.color,
-                  weight: layer.status === "detection_technology" ? 2 : 4,
-                  dashArray: layer.status === "detection_technology"
-                    ? "2, 6"
-                    : layer.dashed
-                    ? "8, 6"
-                    : undefined,
-                  opacity: 0.9,
-                  lineCap: "round",
-                }}
-                eventHandlers={{
-                  mouseover: (e) => { e.target.setStyle({ weight: layer.status === "detection_technology" ? 3 : 6, opacity: 1 }); },
-                  mouseout:  (e) => { e.target.setStyle({ weight: layer.status === "detection_technology" ? 2 : 4, opacity: 0.9 }); },
-                }}
-              >
-                <Popup>
-                  <WallPopupContent meta={seg.meta} statusLabel={statusLabel} />
-                </Popup>
-              </Polyline>
-            ));
+            const isDetection = layer.status === "detection_technology";
+            return layer.segments.map((seg, i) => {
+              const key = `${layer.status}-${i}`;
+              return (
+                <Fragment key={key}>
+                  {/* Thin visible line — non-interactive so the hit area handles events */}
+                  <Polyline
+                    positions={seg.coords}
+                    pathOptions={{
+                      color: layer.color,
+                      weight: isDetection ? 2 : 4,
+                      dashArray: isDetection ? "2, 6" : layer.dashed ? "8, 6" : undefined,
+                      opacity: 0.9,
+                      lineCap: "round",
+                      interactive: false,
+                    }}
+                  />
+                  {/* Wide transparent hit area — ~20 px makes clicking easy */}
+                  <Polyline
+                    positions={seg.coords}
+                    pathOptions={{
+                      color: layer.color,
+                      weight: 20,
+                      opacity: 0.001, // not 0: SVG needs >0 to fire pointer events
+                      lineCap: "round",
+                    }}
+                    eventHandlers={{
+                      mouseover: (e) => { e.target.setStyle({ opacity: 0.12 }); },
+                      mouseout:  (e) => { e.target.setStyle({ opacity: 0.001 }); },
+                    }}
+                  >
+                    <Popup>
+                      <WallPopupContent meta={seg.meta} statusLabel={statusLabel} />
+                    </Popup>
+                  </Polyline>
+                </Fragment>
+              );
+            });
           })}
           {markerIcon.current &&
             videos.map((video) => (
