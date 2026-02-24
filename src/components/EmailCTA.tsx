@@ -49,12 +49,20 @@ export default function EmailCTA() {
           // duplicate — treat as success
           setSubmitted(true);
         } else {
-          setError("Something went wrong. Please try again.");
+          console.error("[EmailCTA] Supabase error:", dbError);
+          if (dbError.code === "42P01") {
+            setError("Email list isn't set up yet. Please try again later.");
+          } else if (dbError.message?.toLowerCase().includes("row-level security") || dbError.code === "42501") {
+            setError("Submission blocked by database policy. Please contact support.");
+          } else {
+            setError(`Error: ${dbError.message || "Something went wrong."}`);
+          }
         }
       } else {
         setSubmitted(true);
       }
-    } catch {
+    } catch (err) {
+      console.error("[EmailCTA] Unexpected error:", err);
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
