@@ -14,13 +14,13 @@ export default function SubmitPage() {
       <div className="max-w-xl mx-auto">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-taupe-400 hover:text-white transition-colors text-sm mb-8"
+          className="inline-flex items-center gap-1.5 text-taupe-400 hover:text-white active:text-white transition-colors text-sm mb-6 min-h-[44px]"
         >
           <ArrowLeft size={16} />
           Back to map
         </Link>
 
-        <h1 className="text-3xl font-bold text-white mb-2">Submit Your Footage</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Submit Your Footage</h1>
         <p className="text-taupe-400 text-sm leading-relaxed mb-8">
           If you have recorded video in or around Big Bend, we would love
           to see it. Upload your footage below and our team will review it.

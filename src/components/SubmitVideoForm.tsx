@@ -88,7 +88,7 @@ export default function SubmitVideoForm() {
         </p>
         <button
           onClick={() => setSuccess(false)}
-          className="px-6 py-2.5 bg-canyon-600 hover:bg-canyon-500 text-white rounded-lg transition-colors text-sm font-medium"
+          className="px-6 py-3 min-h-[44px] bg-canyon-600 hover:bg-canyon-500 active:bg-canyon-500 text-white rounded-lg transition-colors text-sm font-medium"
         >
           Submit Another Video
         </button>
@@ -118,7 +118,7 @@ export default function SubmitVideoForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full pl-10 pr-4 py-2.5 bg-taupe-950 border border-taupe-800 rounded-lg text-white placeholder:text-taupe-600 focus:outline-none focus:border-canyon-600 focus:ring-1 focus:ring-canyon-600 transition-colors text-sm"
+            className="w-full pl-10 pr-4 py-3 bg-taupe-950 border border-taupe-800 rounded-lg text-white placeholder:text-taupe-600 focus:outline-none focus:border-canyon-600 focus:ring-1 focus:ring-canyon-600 transition-colors text-base sm:text-sm"
           />
         </div>
         <p className="mt-1 text-xs text-taupe-500">
@@ -179,7 +179,7 @@ export default function SubmitVideoForm() {
       <button
         type="submit"
         disabled={!file || !email || uploading}
-        className="w-full py-3 bg-canyon-600 hover:bg-canyon-500 disabled:bg-taupe-800 disabled:text-taupe-500 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+        className="w-full py-3.5 min-h-[48px] bg-canyon-600 hover:bg-canyon-500 active:bg-canyon-500 disabled:bg-taupe-800 disabled:text-taupe-500 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
       >
         {uploading ? (
           <>

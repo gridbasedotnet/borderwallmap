@@ -15,11 +15,11 @@ import VideoModal from "./VideoModal";
 function createMarkerIcon(): L.DivIcon {
   return L.divIcon({
     className: "",
-    iconSize: [28, 40],
-    iconAnchor: [14, 40],
-    popupAnchor: [0, -42],
+    iconSize: [32, 44],
+    iconAnchor: [16, 44],
+    popupAnchor: [0, -46],
     html: `
-      <svg width="28" height="40" viewBox="0 0 28 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="32" height="44" viewBox="0 0 28 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 26 14 26s14-15.5 14-26C28 6.268 21.732 0 14 0z" fill="#c45a3a"/>
         <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 26 14 26s14-15.5 14-26C28 6.268 21.732 0 14 0z" fill="none" stroke="#000" stroke-width="1" opacity="0.3"/>
         <polygon points="11,9 11,19 20,14" fill="white"/>
@@ -36,7 +36,11 @@ function FitBounds({ videos }: { videos: ImpactVideo[] }) {
     const bounds = L.latLngBounds(
       videos.map((v) => [v.latitude, v.longitude] as [number, number])
     );
-    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 11 });
+    const isMobile = window.innerWidth < 640;
+    map.fitBounds(bounds, {
+      padding: isMobile ? [30, 30] : [60, 60],
+      maxZoom: 11,
+    });
   }, [videos, map]);
 
   return null;
@@ -83,21 +87,21 @@ export default function ImpactMapClient() {
 
   if (!mounted) {
     return (
-      <div className="w-full h-[500px] md:h-[600px] rounded-xl bg-taupe-950 animate-pulse" />
+      <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-xl bg-taupe-950 animate-pulse" />
     );
   }
 
   if (error) {
     return (
-      <div className="w-full h-[500px] md:h-[600px] rounded-xl bg-taupe-950 border border-taupe-900 flex items-center justify-center">
-        <p className="text-taupe-400 text-lg">{error}</p>
+      <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-xl bg-taupe-950 border border-taupe-900 flex items-center justify-center px-4">
+        <p className="text-taupe-400 text-base text-center">{error}</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="w-full h-[500px] md:h-[600px] rounded-xl overflow-hidden border border-taupe-900">
+      <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-xl overflow-hidden border border-taupe-900">
         <MapContainer
           center={[29.19, -103.3]}
           zoom={9}
@@ -121,17 +125,17 @@ export default function ImpactMapClient() {
                 <Popup>
                   <div
                     style={{
-                      minWidth: "220px",
-                      maxWidth: "280px",
-                      padding: "4px",
+                      minWidth: "180px",
+                      maxWidth: "260px",
+                      padding: "2px",
                     }}
                   >
                     <h3
                       style={{
                         color: "#ffffff",
-                        fontSize: "16px",
+                        fontSize: "15px",
                         fontWeight: "600",
-                        margin: "0 0 6px 0",
+                        margin: "0 0 4px 0",
                         lineHeight: "1.3",
                       }}
                     >
@@ -142,7 +146,7 @@ export default function ImpactMapClient() {
                         style={{
                           color: "#a89a8a",
                           fontSize: "13px",
-                          margin: "0 0 10px 0",
+                          margin: "0 0 8px 0",
                           lineHeight: "1.4",
                         }}
                       >
@@ -153,7 +157,7 @@ export default function ImpactMapClient() {
                       onClick={() => setActiveVideo(video)}
                       style={{
                         width: "100%",
-                        padding: "8px 16px",
+                        padding: "12px 16px",
                         backgroundColor: "#c45a3a",
                         color: "#ffffff",
                         border: "none",
@@ -166,6 +170,7 @@ export default function ImpactMapClient() {
                         justifyContent: "center",
                         gap: "6px",
                         transition: "background-color 0.2s",
+                        WebkitTapHighlightColor: "transparent",
                       }}
                       onMouseEnter={(e) =>
                         (e.currentTarget.style.backgroundColor = "#d97050")
