@@ -25,9 +25,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const sanitizedEmail = email.replace(/[^a-zA-Z0-9@._-]/g, "_");
+  const sanitizedEmail = email
+    .replace("@", "_at_")
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
+  const sanitizedFilename = file.name
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
   const timestamp = Date.now();
-  const path = `${sanitizedEmail}/${timestamp}_${file.name}`;
+  const path = `${sanitizedEmail}/${timestamp}_${sanitizedFilename}`;
 
   const { error: uploadError } = await supabase.storage
     .from("user-submissions")
