@@ -58,7 +58,7 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
         >
           <button
             onClick={onClose}
-            className="absolute -top-12 right-0 text-gray-400 hover:text-white transition-colors z-10"
+            className="absolute -top-12 right-0 text-taupe-400 hover:text-white transition-colors z-10"
             aria-label="Close video"
           >
             <X size={32} />
@@ -69,19 +69,19 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
           </h2>
 
           {hasError ? (
-            <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-12 flex flex-col items-center gap-4 text-center">
+            <div className="bg-taupe-950 border border-taupe-900 rounded-xl p-12 flex flex-col items-center gap-4 text-center">
               <AlertTriangle size={48} className="text-canyon-500" />
               <p className="text-white text-lg font-medium">
                 Video unavailable
               </p>
-              <p className="text-gray-400 text-sm max-w-md">
+              <p className="text-taupe-400 text-sm max-w-md">
                 This video could not be loaded. It may still be processing or
                 temporarily unavailable.
               </p>
               <a
                 href={fullUrl}
                 download
-                className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-canyon-700 hover:bg-canyon-600 text-white rounded-lg transition-colors text-sm"
+                className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-canyon-600 hover:bg-canyon-500 text-white rounded-lg transition-colors text-sm"
               >
                 <Download size={16} />
                 Download Video
