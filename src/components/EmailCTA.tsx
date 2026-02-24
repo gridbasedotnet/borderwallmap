@@ -7,6 +7,7 @@ import { getSupabase } from "@/lib/supabase";
 
 const DELAY_MS = 4_000; // 4 seconds
 const DISMISSED_KEY = "email_cta_dismissed";
+const DISMISS_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export default function EmailCTA() {
   const [visible, setVisible] = useState(false);
@@ -19,7 +20,8 @@ export default function EmailCTA() {
     if (typeof window === "undefined") return;
     // Use localStorage so dismiss persists across tabs but not forever —
     // cleared when the user clears browser data.
-    if (localStorage.getItem(DISMISSED_KEY)) return;
+    const dismissedAt = localStorage.getItem(DISMISSED_KEY);
+    if (dismissedAt && Date.now() - Number(dismissedAt) < DISMISS_TTL_MS) return;
 
     const timer = setTimeout(() => setVisible(true), DELAY_MS);
     return () => clearTimeout(timer);
@@ -27,7 +29,7 @@ export default function EmailCTA() {
 
   const dismiss = useCallback(() => {
     setVisible(false);
-    localStorage.setItem(DISMISSED_KEY, "1");
+    localStorage.setItem(DISMISSED_KEY, String(Date.now()));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
