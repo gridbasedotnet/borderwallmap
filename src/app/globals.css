@@ -145,6 +145,12 @@ body {
   user-select: none;
 }
 
+@media (max-width: 640px) {
+  .marquee-track {
+    color: rgba(255, 230, 160, 0.06);
+  }
+}
+
 .marquee-track span {
   flex-shrink: 0;
   padding-right: 1em;
