@@ -11,46 +11,8 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { getSupabase, ImpactVideo } from "@/lib/supabase";
+import { WALL_ROUTE_LAYERS } from "@/lib/wall_routes";
 import VideoModal from "./VideoModal";
-
-// Approximate planned border wall route for the Big Bend area
-// Based on CBP Smart Wall Map: cbp.gov/border-security/along-us-borders/smart-wall-map
-// Big Bend 4 project: 111 miles through Big Bend National Park
-// Coordinates follow the Rio Grande (US-Mexico border) — approximate
-const PLANNED_ROUTES: [number, number][][] = [
-  // Fort Quitman → Colorado Canyon (Hudspeth/Presidio counties)
-  [
-    [30.051, -105.044],
-    [29.850, -104.780],
-    [29.638, -104.512],
-    [29.450, -104.033],
-    [29.432, -103.961],
-    [29.430, -103.780],
-  ],
-  // Colorado Canyon (Big Bend Ranch SP) → Santa Elena Canyon (Big Bend NP)
-  [
-    [29.430, -103.780],
-    [29.371, -103.770],
-    [29.300, -103.720],
-    [29.250, -103.680],
-    [29.207, -103.652],
-    [29.166, -103.617],
-  ],
-  // Big Bend 4: Santa Elena Canyon → Boquillas Canyon (Big Bend NP)
-  [
-    [29.166, -103.617],
-    [29.140, -103.552],
-    [29.089, -103.453],
-    [29.068, -103.370],
-    [29.082, -103.273],
-    [29.114, -103.219],
-    [29.140, -103.192],
-    [29.150, -103.133],
-    [29.165, -103.060],
-    [29.182, -102.971],
-    [29.185, -102.916],
-  ],
-];
 
 function buildLegendHTML(): string {
   const solid = (color: string) =>
@@ -78,7 +40,7 @@ function buildLegendHTML(): string {
       </div>
       <div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
         <div style="color:rgba(255,255,255,0.28);font-size:9px;line-height:1.5;">
-          Source: CBP Smart Wall Map<br>Route data is approximate
+          Source: CBP Smart Wall Map<br>cbp.gov · ArcGIS Feature Service
         </div>
       </div>
     </div>
@@ -224,19 +186,25 @@ export default function ImpactMapClient() {
           />
           <FitBounds videos={videos} />
           <LegendControl />
-          {PLANNED_ROUTES.map((route, i) => (
-            <Polyline
-              key={`planned-${i}`}
-              positions={route}
-              pathOptions={{
-                color: "#FF9500",
-                weight: 3,
-                dashArray: "8, 6",
-                opacity: 0.85,
-                lineCap: "butt",
-              }}
-            />
-          ))}
+          {WALL_ROUTE_LAYERS.map((layer) =>
+            layer.routes.map((route, i) => (
+              <Polyline
+                key={`${layer.status}-${i}`}
+                positions={route}
+                pathOptions={{
+                  color: layer.color,
+                  weight: layer.status === "detection_technology" ? 2 : 3,
+                  dashArray: layer.status === "detection_technology"
+                    ? "2, 6"
+                    : layer.dashed
+                    ? "8, 6"
+                    : undefined,
+                  opacity: 0.85,
+                  lineCap: "butt",
+                }}
+              />
+            ))
+          )}
           {markerIcon.current &&
             videos.map((video) => (
               <Marker
