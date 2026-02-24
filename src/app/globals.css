@@ -202,6 +202,11 @@ body {
   );
 }
 
+/* Smooth hover transition for wall-line hit areas */
+.wall-hit-area {
+  transition: opacity 0.25s ease;
+}
+
 /* Reusable glass utility */
 @layer utilities {
   .glass {

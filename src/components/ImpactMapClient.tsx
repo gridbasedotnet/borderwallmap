@@ -67,19 +67,24 @@ function buildLegendHTML(): string {
 
   return `
     <div style="color:white;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-      <div style="color:rgba(255,255,255,0.45);font-size:9.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Border Wall Status</div>
-      ${item(solid('#A0A0A0'), 'Existing Primary Barrier')}
-      ${item(solid('#C8BEB4'), 'Existing Secondary Barrier')}
-      ${item(dashed('#FF9500'), 'Planned')}
-      ${item(solid('#FFD44A'), 'Awarded')}
-      ${item(solid('#E06C1C'), 'Under Construction')}
-      ${item(solid('#5EA34B'), 'Completed (since 1/20/25)')}
-      <div style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.08);">
-        ${item(dotted('#6FA8DC'), 'Detection Technology')}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div style="color:rgba(255,255,255,0.45);font-size:9.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;">Border Wall Status</div>
+        <button class="legend-toggle" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.45);font-size:11px;line-height:1;padding:3px 5px;border-radius:4px;flex-shrink:0;" aria-label="Toggle legend">&#9660;</button>
       </div>
-      <div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
-        <div style="color:rgba(255,255,255,0.28);font-size:9px;line-height:1.5;">
-          Source: CBP Smart Wall Map<br>cbp.gov · ArcGIS Feature Service
+      <div class="legend-content" style="margin-top:10px;">
+        ${item(solid('#A0A0A0'), 'Existing Primary Barrier')}
+        ${item(solid('#C8BEB4'), 'Existing Secondary Barrier')}
+        ${item(dashed('#FF9500'), 'Planned')}
+        ${item(solid('#FFD44A'), 'Awarded')}
+        ${item(solid('#E06C1C'), 'Under Construction')}
+        ${item(solid('#5EA34B'), 'Completed (since 1/20/25)')}
+        <div style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.08);">
+          ${item(dotted('#6FA8DC'), 'Detection Technology')}
+        </div>
+        <div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="color:rgba(255,255,255,0.28);font-size:9px;line-height:1.5;">
+            Source: CBP Smart Wall Map<br>cbp.gov - ArcGIS Feature Service
+          </div>
         </div>
       </div>
     </div>
@@ -105,6 +110,25 @@ function LegendControl() {
           margin: 12px;
         `;
         container.innerHTML = buildLegendHTML();
+
+        // Collapse toggle — starts collapsed on mobile
+        const isMobile = window.innerWidth < 640;
+        const content = container.querySelector(".legend-content") as HTMLElement | null;
+        const toggleBtn = container.querySelector(".legend-toggle") as HTMLElement | null;
+        if (content && isMobile) {
+          content.style.display = "none";
+          container.style.minWidth = "";
+          if (toggleBtn) toggleBtn.innerHTML = "&#9650;";
+        }
+        if (toggleBtn && content) {
+          L.DomEvent.addListener(toggleBtn, "click", () => {
+            const collapsed = content.style.display === "none";
+            content.style.display = collapsed ? "" : "none";
+            container.style.minWidth = collapsed ? "205px" : "";
+            toggleBtn.innerHTML = collapsed ? "&#9660;" : "&#9650;";
+          });
+        }
+
         L.DomEvent.disableClickPropagation(container);
         L.DomEvent.disableScrollPropagation(container);
         return container;
@@ -260,7 +284,7 @@ export default function ImpactMapClient() {
         <MapContainer
           center={[29.19, -103.3]}
           zoom={9}
-          scrollWheelZoom={false}
+          scrollWheelZoom={true}
           dragging={true}
           touchZoom={true}
           className="w-full h-full"
@@ -299,6 +323,7 @@ export default function ImpactMapClient() {
                       weight: 20,
                       opacity: 0.001, // not 0: SVG needs >0 to fire pointer events
                       lineCap: "round",
+                      className: "wall-hit-area",
                     }}
                     eventHandlers={{
                       mouseover: (e) => { e.target.setStyle({ opacity: 0.12 }); },

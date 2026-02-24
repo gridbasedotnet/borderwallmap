@@ -43,7 +43,7 @@ export default function EmailCTA() {
     setSubmitting(true);
     try {
       const { error: dbError } = await getSupabase()
-        .from("petition")
+        .from("petitions")
         .insert({ email: trimmed });
 
       if (dbError) {
