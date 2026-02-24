@@ -5,14 +5,14 @@ import { useMemo } from "react";
 
 const TEXT = "NO AL MURO";
 const LINE_COUNT = 12;
-const REPEATS = 8; // how many times the text repeats per line
+const REPEATS = 10;
 
 function generateLines() {
   const lines = [];
   for (let i = 0; i < LINE_COUNT; i++) {
-    // Random duration between 25s and 60s for varied speeds
-    const duration = 25 + Math.random() * 35;
-    // Random initial offset so they don't all start aligned
+    // Slow: 80s–160s per full cycle
+    const duration = 80 + Math.random() * 80;
+    // Random initial offset so lines start staggered
     const offset = -(Math.random() * 100);
     lines.push({ id: i, duration, offset });
   }
@@ -21,7 +21,6 @@ function generateLines() {
 
 export default function ScrollingMarquee() {
   const { scrollYProgress } = useScroll();
-  // Fade out as user scrolls down the page
   const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.6, 0.2, 0.2, 0.6]);
 
   const lines = useMemo(() => generateLines(), []);
@@ -33,20 +32,22 @@ export default function ScrollingMarquee() {
       className="marquee-container"
       aria-hidden="true"
     >
-      {lines.map((line) => (
-        <div key={line.id} className="marquee-line">
-          <div
-            className="marquee-track"
-            style={{
-              animationDuration: `${line.duration}s`,
-              transform: `translateX(${line.offset}%)`,
-            }}
-          >
-            <span>{repeated}</span>
-            <span>{repeated}</span>
+      <div className="marquee-cylinder">
+        {lines.map((line) => (
+          <div key={line.id} className="marquee-line">
+            <div
+              className="marquee-track"
+              style={{
+                animationDuration: `${line.duration}s`,
+                transform: `translateX(${line.offset}%)`,
+              }}
+            >
+              <span>{repeated}</span>
+              <span>{repeated}</span>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </motion.div>
   );
 }

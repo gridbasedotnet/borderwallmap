@@ -100,27 +100,33 @@ body {
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  /* 3D perspective: text wraps around screen edges like a cylinder */
+  perspective: 600px;
+  perspective-origin: 50% 50%;
+}
+
+.marquee-cylinder {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.5) 10%,
-    rgba(0, 0, 0, 0.5) 90%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.5) 10%,
-    rgba(0, 0, 0, 0.5) 90%,
-    transparent 100%
-  );
+  /* Curve the plane away from the viewer for the wrap effect */
+  transform: translateZ(-60px);
+  transform-style: preserve-3d;
+  /* Composite mask: vertical fade (top/bottom) + horizontal fade (left/right wrap) */
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%),
+    linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%),
+    linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+  -webkit-mask-composite: source-in;
 }
 
 .marquee-line {
-  overflow: hidden;
+  overflow: visible;
   white-space: nowrap;
 }
 
