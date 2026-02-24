@@ -57,7 +57,12 @@ export default function SubmitVideoForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Upload failed. Please try again.");
+        const detail = data.details
+          ? ` [path: ${data.details.path}, type: ${data.details.contentType}, size: ${data.details.fileSize}]`
+          : "";
+        throw new Error(
+          (data.error || "Upload failed. Please try again.") + detail
+        );
       }
 
       setSuccess(true);
