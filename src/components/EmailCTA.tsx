@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, ArrowRight, CheckCircle } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 
-const DELAY_MS = 7_000; // 7 seconds
+const DELAY_MS = 4_000; // 4 seconds
 const DISMISSED_KEY = "email_cta_dismissed";
 
 export default function EmailCTA() {
@@ -17,7 +17,9 @@ export default function EmailCTA() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (sessionStorage.getItem(DISMISSED_KEY)) return;
+    // Use localStorage so dismiss persists across tabs but not forever —
+    // cleared when the user clears browser data.
+    if (localStorage.getItem(DISMISSED_KEY)) return;
 
     const timer = setTimeout(() => setVisible(true), DELAY_MS);
     return () => clearTimeout(timer);
@@ -25,7 +27,7 @@ export default function EmailCTA() {
 
   const dismiss = useCallback(() => {
     setVisible(false);
-    sessionStorage.setItem(DISMISSED_KEY, "1");
+    localStorage.setItem(DISMISSED_KEY, "1");
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
