@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, ArrowRight, CheckCircle } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 
-const DELAY_MS = 60_000; // 1 minute
+const DELAY_MS = 7_000; // 7 seconds
 const DISMISSED_KEY = "email_cta_dismissed";
 
 export default function EmailCTA() {
@@ -69,7 +69,8 @@ export default function EmailCTA() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.95 }}
           transition={{ type: "spring", damping: 26, stiffness: 300 }}
-          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-[9000] sm:max-w-sm"
+          className="fixed left-3 right-3 sm:left-auto sm:right-6 z-[9000] sm:max-w-sm"
+          style={{ bottom: "calc(12px + env(safe-area-inset-bottom, 0px))" }}
         >
           <div className="glass-strong glass-glow rounded-2xl p-5 relative">
             {/* Close */}
@@ -100,6 +101,10 @@ export default function EmailCTA() {
                 <form onSubmit={handleSubmit} className="flex gap-2">
                   <input
                     type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    autoCapitalize="off"
+                    autoCorrect="off"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -107,7 +112,7 @@ export default function EmailCTA() {
                     }}
                     placeholder="your@email.com"
                     required
-                    className="flex-1 min-w-0 px-3 py-2.5 min-h-[44px] rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder:text-taupe-600 text-sm focus:outline-none focus:border-canyon-600/40 focus:ring-1 focus:ring-canyon-600/20 transition-all"
+                    className="flex-1 min-w-0 px-3 py-2.5 min-h-[44px] rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder:text-taupe-600 text-base focus:outline-none focus:border-canyon-600/40 focus:ring-1 focus:ring-canyon-600/20 transition-all"
                   />
                   <button
                     type="submit"
