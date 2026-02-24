@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Info, Upload } from "lucide-react";
 import InfoModal from "./InfoModal";
+import ScrollingMarquee from "./ScrollingMarquee";
 
 const ImpactMapClient = dynamic(() => import("./ImpactMapClient"), {
   ssr: false,
@@ -25,11 +26,13 @@ export default function SeeTheImpactContent() {
   const [infoOpen, setInfoOpen] = useState(false);
 
   return (
-    <main className="min-h-screen bg-[#0d0b09]">
+    <main className="relative min-h-screen bg-[#0d0b09]">
+      <ScrollingMarquee />
+
       {/* Hero */}
       <motion.section
         {...fadeInUp}
-        className="pt-8 sm:pt-12 pb-3 px-4 max-w-5xl mx-auto text-center"
+        className="relative z-10 pt-8 sm:pt-12 pb-3 px-4 max-w-5xl mx-auto text-center"
       >
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1.5">
           See the{" "}
@@ -45,7 +48,7 @@ export default function SeeTheImpactContent() {
       <motion.section
         {...fadeInUp}
         transition={{ duration: 0.6, delay: 0.05 }}
-        className="pb-3 px-4 max-w-5xl mx-auto flex items-center justify-between"
+        className="relative z-10 pb-3 px-4 max-w-5xl mx-auto flex items-center justify-between"
       >
         <button
           onClick={() => setInfoOpen(true)}
@@ -68,7 +71,7 @@ export default function SeeTheImpactContent() {
       <motion.section
         {...fadeInUp}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="pb-3 px-3 sm:px-4 max-w-5xl mx-auto"
+        className="relative z-10 pb-3 px-3 sm:px-4 max-w-5xl mx-auto"
       >
         <ImpactMapClient />
       </motion.section>
@@ -77,7 +80,7 @@ export default function SeeTheImpactContent() {
       <motion.div
         {...fadeInUp}
         transition={{ duration: 0.6, delay: 0.15 }}
-        className="pb-6 px-4 max-w-5xl mx-auto text-center"
+        className="relative z-10 pb-6 px-4 max-w-5xl mx-auto text-center"
       >
         <p className="text-taupe-500 text-xs">
           Tap any marker to view video footage from that location. Pinch to zoom.

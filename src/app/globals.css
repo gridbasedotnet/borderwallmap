@@ -93,6 +93,66 @@ body {
   color: #8f7f6e !important;
 }
 
+/* Scrolling marquee background */
+.marquee-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 10%,
+    rgba(0, 0, 0, 0.5) 90%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 10%,
+    rgba(0, 0, 0, 0.5) 90%,
+    transparent 100%
+  );
+}
+
+.marquee-line {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-track {
+  display: inline-flex;
+  gap: 0;
+  animation: marquee-scroll linear infinite;
+  will-change: transform;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.04);
+  letter-spacing: 0.15em;
+  line-height: 1;
+  user-select: none;
+}
+
+.marquee-track span {
+  flex-shrink: 0;
+  padding-right: 1em;
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 /* Reusable glass utility */
 @layer utilities {
   .glass {
