@@ -159,6 +159,43 @@ body {
   }
 }
 
+/* Floating map wrapper — soft feathered edges */
+.map-float-wrapper {
+  position: relative;
+  border-radius: 1rem;
+  will-change: transform;
+  /* Perspective for gyroscope tilt */
+  transform-style: preserve-3d;
+  perspective: 800px;
+}
+
+/* Soft vignette overlay that feathers the map edges */
+.map-float-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow:
+    inset 0 0 40px 20px rgba(13, 11, 9, 0.7),
+    inset 0 0 80px 40px rgba(13, 11, 9, 0.35);
+}
+
+/* Also mask the map itself for a truly soft edge */
+.map-float-wrapper > div {
+  mask-image: radial-gradient(
+    ellipse 95% 92% at 50% 50%,
+    black 60%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 95% 92% at 50% 50%,
+    black 60%,
+    transparent 100%
+  );
+}
+
 /* Reusable glass utility */
 @layer utilities {
   .glass {
