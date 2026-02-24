@@ -1,163 +1,142 @@
 #!/usr/bin/env python3
 """
-CBP Smart Wall Map scraper
+CBP Smart Wall Map scraper — v2
 Intercepts ArcGIS feature service requests made by the CBP Smart Wall Map
 and saves the route GeoJSON for each wall status category.
 
 Usage:
-    pip install playwright
+    pip install playwright requests
     playwright install chromium
-    python3 scrape_cbp_wall.py
+    python scraper/scrape_cbp_wall.py
+
+    # Skip the browser entirely once you have the service URL:
+    python scraper/scrape_cbp_wall.py --direct https://.../FeatureServer
 
 Output:
     scraper/output/wall_features.json   — raw features grouped by status
-    scraper/output/wall_routes.ts       — ready-to-paste TypeScript for ImpactMapClient.tsx
+    scraper/output/wall_routes.ts       — ready-to-paste TypeScript
+    scraper/output/debug_urls.txt       — every URL the browser saw (for debugging)
+    scraper/output/screenshot.png       — screenshot after page load
 """
 
 import asyncio
 import json
 import re
-import os
+import sys
+import time
 from pathlib import Path
-from playwright.async_api import async_playwright, Request, Response
 
+import requests
+from playwright.async_api import async_playwright, Response
+
+# ── Config ────────────────────────────────────────────────────────────────────
 CBP_URL = "https://www.cbp.gov/border-security/along-us-borders/smart-wall-map"
-
-# ArcGIS feature service requests look like:
-#   .../FeatureServer/0/query?...
-#   .../MapServer/0/query?...
 ARCGIS_PATTERN = re.compile(r"/(FeatureServer|MapServer)/\d+/query", re.IGNORECASE)
+FEATURE_SERVER_PATTERN = re.compile(r"(https?://[^\s?]+/(FeatureServer|MapServer))", re.IGNORECASE)
 
-# Status field names to try (ArcGIS layers use different field names)
-STATUS_FIELDS = ["STATUS", "Status", "status", "WALL_STATUS", "TYPE", "Type"]
+OUT_DIR = Path(__file__).parent / "output"
 
-# Map raw status values → legend categories
+STATUS_FIELDS = ["STATUS", "Status", "status", "WALL_STATUS", "TYPE", "Type", "CATEGORY"]
+
 STATUS_MAP = {
-    # Planned
     "planned": "planned",
     "plan": "planned",
-    # Awarded
     "awarded": "awarded",
     "award": "awarded",
     "design": "awarded",
-    # Under Construction
     "under construction": "under_construction",
     "construction": "under_construction",
     "underway": "under_construction",
-    # Completed
     "completed": "completed",
     "complete": "completed",
     "done": "completed",
-    # Existing primary
     "existing primary": "existing_primary",
     "primary": "existing_primary",
     "existing": "existing_primary",
-    # Existing secondary
     "existing secondary": "existing_secondary",
     "secondary": "existing_secondary",
-    # Detection technology
     "detection technology": "detection_technology",
     "technology": "detection_technology",
     "detection": "detection_technology",
 }
 
+COLOR_MAP = {
+    "existing_primary":     ("#A0A0A0", False),
+    "existing_secondary":   ("#C8BEB4", False),
+    "planned":              ("#FF9500", True),
+    "awarded":              ("#FFD44A", False),
+    "under_construction":   ("#E06C1C", False),
+    "completed":            ("#5EA34B", False),
+    "detection_technology": ("#6FA8DC", True),
+    "unknown":              ("#888888", True),
+}
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def normalize_status(raw: str) -> str:
     key = raw.strip().lower()
     return STATUS_MAP.get(key, key.replace(" ", "_"))
 
 
-def extract_coords_from_feature(geom: dict) -> list[list[float]] | None:
-    """Extract a flat list of [lat, lon] pairs from an ArcGIS or GeoJSON geometry."""
-    gtype = geom.get("type") or geom.get("geometry", {}).get("type", "")
+def extract_coords(geom: dict) -> list[list[float]] | None:
+    """Return [[lat, lon], ...] from ArcGIS or GeoJSON geometry."""
+    if not geom:
+        return None
 
-    # ArcGIS Polyline: {"paths": [[[lon, lat], ...]]}
+    # ArcGIS Polyline  {"paths": [[[lon, lat], ...]]}
     if "paths" in geom:
         coords = []
         for path in geom["paths"]:
             for pt in path:
-                coords.append([round(pt[1], 6), round(pt[0], 6)])  # → [lat, lon]
-        return coords if coords else None
+                coords.append([round(pt[1], 6), round(pt[0], 6)])
+        return coords or None
 
-    # GeoJSON LineString
+    gtype = geom.get("type", "")
     if gtype == "LineString":
-        pts = geom.get("coordinates", [])
-        return [[round(p[1], 6), round(p[0], 6)] for p in pts]
-
-    # GeoJSON MultiLineString
+        return [[round(p[1], 6), round(p[0], 6)] for p in geom.get("coordinates", [])]
     if gtype == "MultiLineString":
-        coords = []
+        out = []
         for line in geom.get("coordinates", []):
-            coords.extend([[round(p[1], 6), round(p[0], 6)] for p in line])
-        return coords if coords else None
-
+            out.extend([[round(p[1], 6), round(p[0], 6)] for p in line])
+        return out or None
     return None
 
 
-def parse_arcgis_response(body: str, url: str) -> dict[str, list]:
-    """Parse an ArcGIS feature query response into {status: [[lat,lon],...]} groups."""
+def parse_feature_response(body: str, url: str) -> dict[str, list]:
     try:
         data = json.loads(body)
     except json.JSONDecodeError:
         return {}
-
-    # Could be ArcGIS JSON (has "features" key) or GeoJSON
     features = data.get("features", [])
     if not features:
         return {}
-
-    print(f"  → {len(features)} features from {url.split('?')[0].split('/')[-3:]}")
-
+    print(f"  → {len(features)} features  ({url.split('?')[0][-80:]})")
     grouped: dict[str, list] = {}
-
     for feat in features:
         attrs = feat.get("attributes") or feat.get("properties") or {}
-        geom = feat.get("geometry") or {}
-
-        # Find the status value
+        geom  = feat.get("geometry") or {}
         status_raw = None
         for field in STATUS_FIELDS:
             val = attrs.get(field)
             if val:
                 status_raw = str(val)
                 break
-
         if not status_raw:
-            # Try to infer from any field containing recognizable keywords
             for v in attrs.values():
-                if isinstance(v, str) and v.lower() in STATUS_MAP:
+                if isinstance(v, str) and v.strip().lower() in STATUS_MAP:
                     status_raw = v
                     break
-
-        if not status_raw:
-            status_raw = "unknown"
-
-        status = normalize_status(status_raw)
-        coords = extract_coords_from_feature(geom)
-
+        status = normalize_status(status_raw or "unknown")
+        coords = extract_coords(geom)
         if coords:
             grouped.setdefault(status, []).append(coords)
-
     return grouped
 
 
-def routes_to_typescript(all_routes: dict[str, list[list[list[float]]]]) -> str:
-    """Render the scraped routes as TypeScript source to paste into ImpactMapClient.tsx."""
-
-    COLOR_MAP = {
-        "existing_primary":    ("#A0A0A0", False),
-        "existing_secondary":  ("#C8BEB4", False),
-        "planned":             ("#FF9500", True),
-        "awarded":             ("#FFD44A", False),
-        "under_construction":  ("#E06C1C", False),
-        "completed":           ("#5EA34B", False),
-        "detection_technology":("#6FA8DC", True),
-        "unknown":             ("#888888", True),
-    }
-
+def routes_to_typescript(all_routes: dict[str, list]) -> str:
     lines = [
         "// Auto-generated by scraper/scrape_cbp_wall.py",
-        "// Source: CBP Smart Wall Map (cbp.gov/border-security/along-us-borders/smart-wall-map)",
+        "// Source: CBP Smart Wall Map",
         "",
         "export interface WallRouteLayer {",
         "  status: string;",
@@ -168,53 +147,120 @@ def routes_to_typescript(all_routes: dict[str, list[list[list[float]]]]) -> str:
         "",
         "export const WALL_ROUTE_LAYERS: WallRouteLayer[] = [",
     ]
-
     for status, route_list in all_routes.items():
         color, dashed = COLOR_MAP.get(status, ("#888888", True))
-        # Deduplicate and filter trivial segments
-        non_trivial = [r for r in route_list if len(r) >= 2]
-        if not non_trivial:
+        segs = [r for r in route_list if len(r) >= 2]
+        if not segs:
             continue
-
-        lines.append(f"  {{")
-        lines.append(f"    status: {json.dumps(status)},")
-        lines.append(f"    color: {json.dumps(color)},")
-        lines.append(f"    dashed: {'true' if dashed else 'false'},")
-        lines.append(f"    routes: [")
-        for route in non_trivial:
+        lines += [
+            "  {",
+            f"    status: {json.dumps(status)},",
+            f"    color: {json.dumps(color)},",
+            f"    dashed: {'true' if dashed else 'false'},",
+            "    routes: [",
+        ]
+        for route in segs:
             pts = ", ".join(f"[{lat}, {lon}]" for lat, lon in route)
             lines.append(f"      [{pts}],")
-        lines.append(f"    ],")
-        lines.append(f"  }},")
-
+        lines += ["    ],", "  },"]
     lines.append("];")
     return "\n".join(lines)
 
 
-async def run():
-    out_dir = Path(__file__).parent / "output"
-    out_dir.mkdir(parents=True, exist_ok=True)
+def save_outputs(all_routes: dict[str, list]) -> None:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    total = sum(len(v) for v in all_routes.values())
+    print(f"\n✓ {total} route segments across statuses: {list(all_routes.keys())}")
+
+    raw = OUT_DIR / "wall_features.json"
+    raw.write_text(json.dumps(all_routes, indent=2))
+    print(f"  Saved → {raw}")
+
+    ts = OUT_DIR / "wall_routes.ts"
+    ts.write_text(routes_to_typescript(all_routes))
+    print(f"  Saved → {ts}")
+    print("\nNext: copy wall_routes.ts into src/lib/ and update ImpactMapClient.tsx.")
+
+
+# ── Direct REST API mode ───────────────────────────────────────────────────────
+
+def query_feature_server(base_url: str) -> dict[str, list]:
+    """
+    Query an ArcGIS FeatureServer/MapServer directly (no browser).
+    base_url should end with .../FeatureServer or .../MapServer
+    """
+    base_url = base_url.rstrip("/")
+    # Get layer list
+    info_url = f"{base_url}?f=json"
+    print(f"Fetching service info: {info_url}")
+    resp = requests.get(info_url, timeout=30)
+    resp.raise_for_status()
+    info = resp.json()
+
+    layers = info.get("layers", [])
+    if not layers:
+        # Maybe this is already a specific layer URL
+        layers = [{"id": 0}]
 
     all_routes: dict[str, list] = {}
-    captured_urls: list[str] = []
 
-    print("Launching browser…")
+    for layer in layers:
+        lid = layer.get("id", 0)
+        layer_name = layer.get("name", f"layer_{lid}")
+        query_url = f"{base_url}/{lid}/query"
+        params = {
+            "where": "1=1",
+            "outFields": "*",
+            "geometryType": "esriGeometryPolyline",
+            "returnGeometry": "true",
+            "f": "geojson",
+            "resultOffset": 0,
+            "resultRecordCount": 2000,
+        }
+        print(f"  Querying layer {lid} '{layer_name}'…")
+        try:
+            r = requests.get(query_url, params=params, timeout=60)
+            r.raise_for_status()
+            grouped = parse_feature_response(r.text, query_url)
+            for status, routes in grouped.items():
+                all_routes.setdefault(status, []).extend(routes)
+        except Exception as e:
+            print(f"    ✗ {e}")
+
+    return all_routes
+
+
+# ── Browser scrape mode ────────────────────────────────────────────────────────
+
+async def scrape_browser() -> dict[str, list]:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    all_routes: dict[str, list] = {}
+    all_urls: list[str] = []
+    service_base_urls: set[str] = set()
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        # headless=False bypasses Cloudflare bot detection; the user will see a
+        # Chrome window open briefly — that is expected.
+        browser = await p.chromium.launch(headless=False)
         context = await browser.new_context(
             viewport={"width": 1400, "height": 900},
             user_agent=(
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
                 "Chrome/124.0.0.0 Safari/537.36"
             ),
         )
         page = await context.new_page()
 
-        # ── Intercept responses ──────────────────────────────────────────────
         async def on_response(response: Response):
             url = response.url
+            all_urls.append(url)
+
+            # Collect FeatureServer base URLs for potential direct re-query
+            m = FEATURE_SERVER_PATTERN.search(url)
+            if m:
+                service_base_urls.add(m.group(1))
+
             if not ARCGIS_PATTERN.search(url):
                 return
             if response.status != 200:
@@ -223,64 +269,83 @@ async def run():
                 body = await response.text()
             except Exception:
                 return
-
-            print(f"Captured: {url[:120]}")
-            captured_urls.append(url)
-
-            grouped = parse_arcgis_response(body, url)
-            for status, route_list in grouped.items():
-                all_routes.setdefault(status, []).extend(route_list)
+            print(f"Captured ArcGIS: {url[:120]}")
+            grouped = parse_feature_response(body, url)
+            for status, routes in grouped.items():
+                all_routes.setdefault(status, []).extend(routes)
 
         page.on("response", on_response)
 
-        # ── Navigate ─────────────────────────────────────────────────────────
         print(f"\nNavigating to {CBP_URL} …")
-        await page.goto(CBP_URL, wait_until="domcontentloaded", timeout=60_000)
-
-        # Wait for the ArcGIS Experience Builder iframe / map to initialise.
-        # The map makes XHR requests after page load, so we wait generously.
-        print("Waiting for map data to load (up to 30 s)…")
-        await asyncio.sleep(30)
-
-        # Try scrolling / panning to trigger any lazy-loading of additional sectors
+        print("(A Chrome window will open — this is normal)\n")
         try:
-            await page.evaluate(
-                """() => {
-                    const frames = document.querySelectorAll('iframe');
-                    frames.forEach(f => {
-                        try { f.contentWindow.scrollBy(100, 0); } catch(e) {}
-                    });
-                }"""
-            )
-            await asyncio.sleep(5)
+            await page.goto(CBP_URL, wait_until="domcontentloaded", timeout=60_000)
+        except Exception as e:
+            print(f"Navigation warning: {e}")
+
+        print("Waiting up to 45 s for map data…")
+        await asyncio.sleep(45)
+
+        # Screenshot for debugging
+        try:
+            ss = OUT_DIR / "screenshot.png"
+            await page.screenshot(path=str(ss), full_page=False)
+            print(f"Screenshot → {ss}")
         except Exception:
             pass
 
         await browser.close()
 
-    # ── Write output ─────────────────────────────────────────────────────────
+    # Save debug URL list
+    debug = OUT_DIR / "debug_urls.txt"
+    debug.write_text("\n".join(all_urls))
+    print(f"All URLs seen ({len(all_urls)}) → {debug}")
+
+    if service_base_urls:
+        print(f"\nFeatureServer base URLs found:")
+        for u in service_base_urls:
+            print(f"  {u}")
+        svc_file = OUT_DIR / "service_urls.txt"
+        svc_file.write_text("\n".join(service_base_urls))
+        print(f"  Saved → {svc_file}")
+
+    return all_routes, service_base_urls
+
+
+# ── Entry point ───────────────────────────────────────────────────────────────
+
+async def main():
+    # --direct <url>  →  skip the browser, query ArcGIS REST API directly
+    if "--direct" in sys.argv:
+        idx = sys.argv.index("--direct")
+        if idx + 1 >= len(sys.argv):
+            print("Usage: python scrape_cbp_wall.py --direct <FeatureServer URL>")
+            sys.exit(1)
+        base_url = sys.argv[idx + 1]
+        print(f"Direct REST mode: {base_url}")
+        all_routes = query_feature_server(base_url)
+    else:
+        print("Browser intercept mode (headed Chrome)…")
+        all_routes, service_base_urls = await scrape_browser()
+
+        if not all_routes and service_base_urls:
+            print("\nNo features captured via intercept; trying direct REST query…")
+            for url in service_base_urls:
+                routes = query_feature_server(url)
+                for status, segs in routes.items():
+                    all_routes.setdefault(status, []).extend(segs)
+
     if not all_routes:
-        print("\n⚠  No ArcGIS feature data was captured.")
-        print("   The map may be behind Cloudflare or require a different approach.")
-        print(f"   URLs seen: {captured_urls or 'none'}")
+        print("\n⚠  No route data captured.")
+        print("   Next steps:")
+        print("   1. Open scraper/output/debug_urls.txt and search for 'FeatureServer'")
+        print("   2. Copy that base URL and run:")
+        print("      python scraper/scrape_cbp_wall.py --direct <url>")
+        print("   3. Or open scraper/output/screenshot.png to see what the browser saw.")
         return
 
-    print(f"\n✓ Captured {sum(len(v) for v in all_routes.values())} route segments")
-    print(f"  Statuses found: {list(all_routes.keys())}")
-
-    # Raw JSON
-    raw_path = out_dir / "wall_features.json"
-    with open(raw_path, "w") as f:
-        json.dump(all_routes, f, indent=2)
-    print(f"  Saved raw data → {raw_path}")
-
-    # TypeScript
-    ts_path = out_dir / "wall_routes.ts"
-    with open(ts_path, "w") as f:
-        f.write(routes_to_typescript(all_routes))
-    print(f"  Saved TypeScript → {ts_path}")
-    print("\nNext step: copy wall_routes.ts into src/lib/ and update ImpactMapClient.tsx.")
+    save_outputs(all_routes)
 
 
 if __name__ == "__main__":
-    asyncio.run(run())
+    asyncio.run(main())
