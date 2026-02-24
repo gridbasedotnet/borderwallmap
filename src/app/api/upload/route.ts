@@ -33,11 +33,16 @@ export async function POST(request: NextRequest) {
   const timestamp = Date.now();
   const path = `${sanitizedEmail}/${timestamp}_${sanitizedFilename}`;
 
+  // Convert File to ArrayBuffer for Node.js runtime compatibility
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = new Uint8Array(arrayBuffer);
+
   const { error: uploadError } = await supabase.storage
     .from("user-submissions")
-    .upload(path, file, {
+    .upload(path, buffer, {
       cacheControl: "3600",
       upsert: false,
+      contentType: file.type || "video/mp4",
     });
 
   if (uploadError) {
@@ -46,6 +51,15 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+
+  // Store submission metadata
+  await supabase.from("video_submissions").insert({
+    email,
+    filename: file.name,
+    storage_path: path,
+    file_size: file.size,
+    content_type: file.type,
+  });
 
   return NextResponse.json({ success: true });
 }
