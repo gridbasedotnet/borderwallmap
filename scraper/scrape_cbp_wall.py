@@ -78,28 +78,36 @@ def normalize_status(raw: str) -> str:
     return STATUS_MAP.get(key, key.replace(" ", "_"))
 
 
-def extract_coords(geom: dict) -> list[list[float]] | None:
-    """Return [[lat, lon], ...] from ArcGIS or GeoJSON geometry."""
+def extract_segments(geom: dict) -> list[list[list[float]]]:
+    """Return a list of segments, each segment = [[lat, lon], ...].
+
+    Each ArcGIS path / GeoJSON ring becomes its own segment so Leaflet never
+    draws a straight connector line between disconnected pieces.
+    """
     if not geom:
-        return None
+        return []
 
     # ArcGIS Polyline  {"paths": [[[lon, lat], ...]]}
     if "paths" in geom:
-        coords = []
+        out = []
         for path in geom["paths"]:
-            for pt in path:
-                coords.append([round(pt[1], 6), round(pt[0], 6)])
-        return coords or None
+            seg = [[round(pt[1], 6), round(pt[0], 6)] for pt in path]
+            if len(seg) >= 2:
+                out.append(seg)
+        return out
 
     gtype = geom.get("type", "")
     if gtype == "LineString":
-        return [[round(p[1], 6), round(p[0], 6)] for p in geom.get("coordinates", [])]
+        seg = [[round(p[1], 6), round(p[0], 6)] for p in geom.get("coordinates", [])]
+        return [seg] if len(seg) >= 2 else []
     if gtype == "MultiLineString":
         out = []
         for line in geom.get("coordinates", []):
-            out.extend([[round(p[1], 6), round(p[0], 6)] for p in line])
-        return out or None
-    return None
+            seg = [[round(p[1], 6), round(p[0], 6)] for p in line]
+            if len(seg) >= 2:
+                out.append(seg)
+        return out
+    return []
 
 
 def parse_feature_response(body: str, url: str) -> dict[str, list]:
@@ -127,9 +135,8 @@ def parse_feature_response(body: str, url: str) -> dict[str, list]:
                     status_raw = v
                     break
         status = normalize_status(status_raw or "unknown")
-        coords = extract_coords(geom)
-        if coords:
-            grouped.setdefault(status, []).append(coords)
+        for seg in extract_segments(geom):
+            grouped.setdefault(status, []).append(seg)
     return grouped
 
 
