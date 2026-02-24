@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 
@@ -26,6 +27,21 @@ export default function Footer() {
           nobigbendwall.com
           <ExternalLink size={12} />
         </a>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/privacy"
+            className="text-taupe-600 hover:text-taupe-400 text-xs transition-colors"
+          >
+            Privacy Policy
+          </Link>
+          <span className="text-taupe-700 text-xs">|</span>
+          <Link
+            href="/terms"
+            className="text-taupe-600 hover:text-taupe-400 text-xs transition-colors"
+          >
+            Terms of Service
+          </Link>
+        </div>
       </div>
     </motion.footer>
   );
