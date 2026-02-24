@@ -9,7 +9,7 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
-import { supabase, ImpactVideo } from "@/lib/supabase";
+import { getSupabase, ImpactVideo } from "@/lib/supabase";
 import VideoModal from "./VideoModal";
 
 function createMarkerIcon(): L.DivIcon {
@@ -20,7 +20,7 @@ function createMarkerIcon(): L.DivIcon {
     popupAnchor: [0, -42],
     html: `
       <svg width="28" height="40" viewBox="0 0 28 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 26 14 26s14-15.5 14-26C28 6.268 21.732 0 14 0z" fill="#8b0000"/>
+        <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 26 14 26s14-15.5 14-26C28 6.268 21.732 0 14 0z" fill="#c45a3a"/>
         <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 26 14 26s14-15.5 14-26C28 6.268 21.732 0 14 0z" fill="none" stroke="#000" stroke-width="1" opacity="0.3"/>
         <polygon points="11,9 11,19 20,14" fill="white"/>
       </svg>
@@ -56,7 +56,7 @@ export default function ImpactMapClient() {
 
   useEffect(() => {
     async function fetchVideos() {
-      const { data, error: fetchError } = await supabase
+      const { data, error: fetchError } = await getSupabase()
         .from("impact_videos")
         .select("*")
         .order("recorded_at", { ascending: true });
@@ -83,21 +83,21 @@ export default function ImpactMapClient() {
 
   if (!mounted) {
     return (
-      <div className="w-full h-[500px] md:h-[600px] rounded-xl bg-gray-900 animate-pulse" />
+      <div className="w-full h-[500px] md:h-[600px] rounded-xl bg-taupe-950 animate-pulse" />
     );
   }
 
   if (error) {
     return (
-      <div className="w-full h-[500px] md:h-[600px] rounded-xl bg-[#1a1a1a] border border-gray-800 flex items-center justify-center">
-        <p className="text-gray-400 text-lg">{error}</p>
+      <div className="w-full h-[500px] md:h-[600px] rounded-xl bg-taupe-950 border border-taupe-900 flex items-center justify-center">
+        <p className="text-taupe-400 text-lg">{error}</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="w-full h-[500px] md:h-[600px] rounded-xl overflow-hidden border border-gray-800">
+      <div className="w-full h-[500px] md:h-[600px] rounded-xl overflow-hidden border border-taupe-900">
         <MapContainer
           center={[29.19, -103.3]}
           zoom={9}
@@ -140,7 +140,7 @@ export default function ImpactMapClient() {
                     {video.description && (
                       <p
                         style={{
-                          color: "#9ca3af",
+                          color: "#a89a8a",
                           fontSize: "13px",
                           margin: "0 0 10px 0",
                           lineHeight: "1.4",
@@ -154,7 +154,7 @@ export default function ImpactMapClient() {
                       style={{
                         width: "100%",
                         padding: "8px 16px",
-                        backgroundColor: "#8b0000",
+                        backgroundColor: "#c45a3a",
                         color: "#ffffff",
                         border: "none",
                         borderRadius: "8px",
@@ -168,10 +168,10 @@ export default function ImpactMapClient() {
                         transition: "background-color 0.2s",
                       }}
                       onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#b83a20")
+                        (e.currentTarget.style.backgroundColor = "#d97050")
                       }
                       onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#8b0000")
+                        (e.currentTarget.style.backgroundColor = "#c45a3a")
                       }
                     >
                       <svg
