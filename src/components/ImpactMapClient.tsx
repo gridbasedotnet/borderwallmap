@@ -11,8 +11,47 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { getSupabase, ImpactVideo } from "@/lib/supabase";
-import { WALL_ROUTE_LAYERS } from "@/lib/wall_routes";
+import { WALL_ROUTE_LAYERS, WallSegmentMeta } from "@/lib/wall_routes";
 import VideoModal from "./VideoModal";
+
+// ── Popup content for a clicked wall segment ───────────────────────────────
+// CBP field names vary by layer; we try common variants.
+function pickMeta(meta: WallSegmentMeta, ...keys: string[]): string | number | null {
+  for (const k of keys) {
+    const v = meta[k];
+    if (v !== undefined && v !== null && v !== "") return v;
+  }
+  return null;
+}
+
+function WallPopupContent({ meta, statusLabel }: { meta: WallSegmentMeta; statusLabel: string }) {
+  const name     = pickMeta(meta, "Project_Name", "Proj_Name", "Name", "PROJECT_NAME");
+  const type     = pickMeta(meta, "Project_Type", "Proj_Type", "Type", "PROJ_TYPE");
+  const location = pickMeta(meta, "Location", "Sector", "AOR", "SECTOR");
+  const mileage  = pickMeta(meta, "Proj_Miles", "Project_Mileage", "Miles", "Mileage", "PROJ_MILES");
+
+  const row = (label: string, value: string | number | null) =>
+    value ? (
+      <div style={{ display: "flex", gap: "8px", marginBottom: "4px" }}>
+        <span style={{ color: "rgba(255,255,255,0.45)", fontSize: "11px", minWidth: "90px", flexShrink: 0 }}>{label}</span>
+        <span style={{ color: "rgba(255,255,255,0.9)", fontSize: "11px" }}>{value}</span>
+      </div>
+    ) : null;
+
+  return (
+    <div style={{ minWidth: "180px", fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" }}>
+      {name && (
+        <div style={{ color: "#ffffff", fontWeight: 600, fontSize: "13px", marginBottom: "8px", lineHeight: 1.3 }}>
+          {name}
+        </div>
+      )}
+      {row("Project Type", type)}
+      {row("Status", statusLabel)}
+      {row("Location", location)}
+      {mileage && row("Project Mileage", `${mileage} mi`)}
+    </div>
+  );
+}
 
 function buildLegendHTML(): string {
   const solid = (color: string) =>
@@ -186,25 +225,34 @@ export default function ImpactMapClient() {
           />
           <FitBounds videos={videos} />
           <LegendControl />
-          {WALL_ROUTE_LAYERS.map((layer) =>
-            layer.routes.map((route, i) => (
+          {WALL_ROUTE_LAYERS.map((layer) => {
+            const statusLabel = layer.status.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+            return layer.segments.map((seg, i) => (
               <Polyline
                 key={`${layer.status}-${i}`}
-                positions={route}
+                positions={seg.coords}
                 pathOptions={{
                   color: layer.color,
-                  weight: layer.status === "detection_technology" ? 2 : 3,
+                  weight: layer.status === "detection_technology" ? 2 : 4,
                   dashArray: layer.status === "detection_technology"
                     ? "2, 6"
                     : layer.dashed
                     ? "8, 6"
                     : undefined,
-                  opacity: 0.85,
-                  lineCap: "butt",
+                  opacity: 0.9,
+                  lineCap: "round",
                 }}
-              />
-            ))
-          )}
+                eventHandlers={{
+                  mouseover: (e) => { e.target.setStyle({ weight: layer.status === "detection_technology" ? 3 : 6, opacity: 1 }); },
+                  mouseout:  (e) => { e.target.setStyle({ weight: layer.status === "detection_technology" ? 2 : 4, opacity: 0.9 }); },
+                }}
+              >
+                <Popup>
+                  <WallPopupContent meta={seg.meta} statusLabel={statusLabel} />
+                </Popup>
+              </Polyline>
+            ));
+          })}
           {markerIcon.current &&
             videos.map((video) => (
               <Marker
