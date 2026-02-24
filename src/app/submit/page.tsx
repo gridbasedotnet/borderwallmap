@@ -29,7 +29,7 @@ export default function SubmitPage() {
           is required.
         </p>
 
-        <div className="bg-taupe-950 border border-taupe-900 rounded-xl p-6 md:p-8">
+        <div className="glass glass-glow rounded-2xl p-6 md:p-8">
           <SubmitVideoForm />
         </div>
 
