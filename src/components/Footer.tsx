@@ -21,7 +21,7 @@ export default function Footer() {
           href="https://www.nobigbendwall.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-taupe-500 hover:text-canyon-500 text-xs transition-colors"
+          className="inline-flex items-center gap-1 text-taupe-500 hover:text-canyon-500 active:text-canyon-500 text-xs transition-colors min-h-[44px]"
         >
           nobigbendwall.com
           <ExternalLink size={12} />

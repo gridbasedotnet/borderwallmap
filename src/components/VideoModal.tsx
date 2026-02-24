@@ -45,33 +45,35 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-sm"
+        className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/90 sm:bg-black/85 backdrop-blur-sm"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="relative w-full max-w-4xl mx-4"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
+          className="relative w-full sm:max-w-4xl sm:mx-4"
         >
-          <button
-            onClick={onClose}
-            className="absolute -top-12 right-0 text-taupe-400 hover:text-white transition-colors z-10"
-            aria-label="Close video"
-          >
-            <X size={32} />
-          </button>
-
-          <h2 className="text-white text-xl font-semibold mb-4">
-            {video.title}
-          </h2>
+          {/* Header with title and close */}
+          <div className="flex items-center justify-between px-4 py-3 sm:px-0 sm:pb-3">
+            <h2 className="text-white text-base sm:text-xl font-semibold truncate pr-4">
+              {video.title}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-taupe-400 hover:text-white active:text-white transition-colors shrink-0 p-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="Close video"
+            >
+              <X size={24} />
+            </button>
+          </div>
 
           {hasError ? (
-            <div className="bg-taupe-950 border border-taupe-900 rounded-xl p-12 flex flex-col items-center gap-4 text-center">
-              <AlertTriangle size={48} className="text-canyon-500" />
-              <p className="text-white text-lg font-medium">
+            <div className="bg-taupe-950 border-t sm:border border-taupe-900 sm:rounded-xl p-6 sm:p-12 flex flex-col items-center gap-4 text-center">
+              <AlertTriangle size={40} className="text-canyon-500" />
+              <p className="text-white text-base font-medium">
                 Video unavailable
               </p>
               <p className="text-taupe-400 text-sm max-w-md">
@@ -81,19 +83,19 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
               <a
                 href={fullUrl}
                 download
-                className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-canyon-600 hover:bg-canyon-500 text-white rounded-lg transition-colors text-sm"
+                className="mt-2 inline-flex items-center gap-2 px-5 py-3 min-h-[44px] bg-canyon-600 hover:bg-canyon-500 active:bg-canyon-500 text-white rounded-lg transition-colors text-sm"
               >
                 <Download size={16} />
                 Download Video
               </a>
             </div>
           ) : (
-            <div className="bg-black rounded-xl overflow-hidden">
+            <div className="bg-black sm:rounded-xl overflow-hidden">
               <video
                 controls
                 autoPlay
                 playsInline
-                className="w-full max-h-[75vh]"
+                className="w-full max-h-[70vh] sm:max-h-[75vh]"
                 onError={() => setHasError(true)}
               >
                 <source src={fullUrl} type="video/mp4" />
