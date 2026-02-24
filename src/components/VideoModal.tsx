@@ -63,10 +63,10 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
             </h2>
             <button
               onClick={onClose}
-              className="text-taupe-400 hover:text-white active:text-white transition-colors shrink-0 p-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="glass text-white hover:text-white active:text-white transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full"
               aria-label="Close video"
             >
-              <X size={24} />
+              <X size={22} />
             </button>
           </div>
 
@@ -104,6 +104,17 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
               </video>
             </div>
           )}
+
+          {/* Prominent close button below content — always visible */}
+          <div className="flex justify-center px-4 py-4 sm:pt-4 sm:pb-0">
+            <button
+              onClick={onClose}
+              className="flex items-center gap-2 px-6 py-3 min-h-[48px] glass text-white rounded-full text-sm font-medium transition-colors hover:bg-white/10 active:bg-white/10"
+            >
+              <X size={18} />
+              Close
+            </button>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
