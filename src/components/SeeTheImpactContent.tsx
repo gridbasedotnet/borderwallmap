@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Info, Upload } from "lucide-react";
 import InfoModal from "./InfoModal";
+import EmailCTA from "./EmailCTA";
 import ScrollingMarquee from "./ScrollingMarquee";
 import { useGyroscope } from "@/hooks/useGyroscope";
 
@@ -108,6 +109,7 @@ export default function SeeTheImpactContent() {
       </motion.div>
 
       <InfoModal open={infoOpen} onClose={() => setInfoOpen(false)} />
+      <EmailCTA />
     </main>
   );
 }
