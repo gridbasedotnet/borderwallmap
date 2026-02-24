@@ -6,6 +6,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Info, Upload } from "lucide-react";
 import InfoModal from "./InfoModal";
+import ScrollingMarquee from "./ScrollingMarquee";
+import { useGyroscope } from "@/hooks/useGyroscope";
 
 const ImpactMapClient = dynamic(() => import("./ImpactMapClient"), {
   ssr: false,
@@ -23,13 +25,30 @@ const fadeInUp = {
 
 export default function SeeTheImpactContent() {
   const [infoOpen, setInfoOpen] = useState(false);
+  const gyro = useGyroscope();
+
+  // Subtle parallax offsets driven by device tilt
+  const mapShift = gyro.supported
+    ? {
+        transform: `translate3d(${gyro.x * 6}px, ${gyro.y * 6}px, 0) rotateY(${gyro.x * 1.5}deg) rotateX(${-gyro.y * 1.5}deg)`,
+      }
+    : undefined;
+
+  const uiShift = gyro.supported
+    ? {
+        transform: `translate3d(${gyro.x * 3}px, ${gyro.y * 3}px, 0)`,
+      }
+    : undefined;
 
   return (
-    <main className="min-h-screen bg-[#0d0b09]">
+    <main className="relative min-h-screen bg-[#0d0b09]">
+      <ScrollingMarquee />
+
       {/* Hero */}
       <motion.section
         {...fadeInUp}
-        className="pt-8 sm:pt-12 pb-3 px-4 max-w-5xl mx-auto text-center"
+        className="relative z-10 pt-8 sm:pt-12 pb-3 px-4 max-w-5xl mx-auto text-center"
+        style={uiShift}
       >
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1.5">
           See the{" "}
@@ -45,7 +64,8 @@ export default function SeeTheImpactContent() {
       <motion.section
         {...fadeInUp}
         transition={{ duration: 0.6, delay: 0.05 }}
-        className="pb-3 px-4 max-w-5xl mx-auto flex items-center justify-between"
+        className="relative z-10 pb-3 px-4 max-w-5xl mx-auto flex items-center justify-between"
+        style={uiShift}
       >
         <button
           onClick={() => setInfoOpen(true)}
@@ -68,16 +88,19 @@ export default function SeeTheImpactContent() {
       <motion.section
         {...fadeInUp}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="pb-3 px-3 sm:px-4 max-w-5xl mx-auto"
+        className="relative z-10 pb-3 px-3 sm:px-4 max-w-5xl mx-auto"
       >
-        <ImpactMapClient />
+        <div className="map-float-wrapper" style={mapShift}>
+          <ImpactMapClient />
+        </div>
       </motion.section>
 
       {/* Instructions */}
       <motion.div
         {...fadeInUp}
         transition={{ duration: 0.6, delay: 0.15 }}
-        className="pb-6 px-4 max-w-5xl mx-auto text-center"
+        className="relative z-10 pb-6 px-4 max-w-5xl mx-auto text-center"
+        style={uiShift}
       >
         <p className="text-taupe-500 text-xs">
           Tap any marker to view video footage from that location. Pinch to zoom.
