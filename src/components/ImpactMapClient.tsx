@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Fragment } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -155,6 +155,52 @@ function FitBounds({ videos }: { videos: ImpactVideo[] }) {
   return null;
 }
 
+// ── POI labels ─────────────────────────────────────────────────────────────
+const POI_LABELS: { name: string; lat: number; lon: number; color: string }[] = [
+  { name: "Big Bend\nNational Park",           lat: 29.22,  lon: -103.25, color: "#7EC87A" },
+  { name: "Big Bend Ranch\nState Park",        lat: 29.46,  lon: -104.12, color: "#9ED890" },
+  { name: "Guadalupe Mountains\nNational Park",lat: 31.89,  lon: -104.85, color: "#7EC87A" },
+  { name: "Amistad National\nRecreation Area", lat: 29.50,  lon: -101.07, color: "#7ABCB0" },
+  { name: "Rio Grande\nWild & Scenic River",   lat: 29.53,  lon: -102.57, color: "#9898CC" },
+  { name: "Santa Elena\nCanyon",               lat: 29.165, lon: -103.615,color: "#B8A878" },
+  { name: "Boquillas\nCanyon",                 lat: 29.19,  lon: -102.87, color: "#B8A878" },
+];
+
+function PoiLabels() {
+  const map = useMap();
+
+  useEffect(() => {
+    const markers = POI_LABELS.map(({ name, lat, lon, color }) => {
+      const lines = name.split("\n");
+      const rows = lines
+        .map(
+          (l, i) =>
+            `<div style="color:${color};font-size:${i === 0 ? 10.5 : 9.5}px;` +
+            `font-weight:${i === 0 ? 600 : 400};` +
+            `font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;` +
+            `line-height:1.4;letter-spacing:0.04em;white-space:nowrap;">${l}</div>`
+        )
+        .join("");
+
+      const html =
+        `<div style="position:absolute;transform:translate(-50%,-50%);pointer-events:none;">` +
+        `<div style="background:rgba(13,11,9,0.72);border:1px solid ${color}45;` +
+        `border-radius:5px;padding:3px 8px;text-align:center;">${rows}</div></div>`;
+
+      return L.marker([lat, lon] as L.LatLngTuple, {
+        icon: L.divIcon({ className: "", html, iconSize: [0, 0], iconAnchor: [0, 0] }),
+        interactive: false,
+        keyboard: false,
+        zIndexOffset: -1000,
+      }).addTo(map);
+    });
+
+    return () => { markers.forEach((m) => m.remove()); };
+  }, [map]);
+
+  return null;
+}
+
 export default function ImpactMapClient() {
   const [videos, setVideos] = useState<ImpactVideo[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -225,33 +271,47 @@ export default function ImpactMapClient() {
           />
           <FitBounds videos={videos} />
           <LegendControl />
+          <PoiLabels />
           {WALL_ROUTE_LAYERS.map((layer) => {
             const statusLabel = layer.status.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-            return layer.segments.map((seg, i) => (
-              <Polyline
-                key={`${layer.status}-${i}`}
-                positions={seg.coords}
-                pathOptions={{
-                  color: layer.color,
-                  weight: layer.status === "detection_technology" ? 2 : 4,
-                  dashArray: layer.status === "detection_technology"
-                    ? "2, 6"
-                    : layer.dashed
-                    ? "8, 6"
-                    : undefined,
-                  opacity: 0.9,
-                  lineCap: "round",
-                }}
-                eventHandlers={{
-                  mouseover: (e) => { e.target.setStyle({ weight: layer.status === "detection_technology" ? 3 : 6, opacity: 1 }); },
-                  mouseout:  (e) => { e.target.setStyle({ weight: layer.status === "detection_technology" ? 2 : 4, opacity: 0.9 }); },
-                }}
-              >
-                <Popup>
-                  <WallPopupContent meta={seg.meta} statusLabel={statusLabel} />
-                </Popup>
-              </Polyline>
-            ));
+            const isDetection = layer.status === "detection_technology";
+            return layer.segments.map((seg, i) => {
+              const key = `${layer.status}-${i}`;
+              return (
+                <Fragment key={key}>
+                  {/* Thin visible line — non-interactive so the hit area handles events */}
+                  <Polyline
+                    positions={seg.coords}
+                    pathOptions={{
+                      color: layer.color,
+                      weight: isDetection ? 2 : 4,
+                      dashArray: isDetection ? "2, 6" : layer.dashed ? "8, 6" : undefined,
+                      opacity: 0.9,
+                      lineCap: "round",
+                      interactive: false,
+                    }}
+                  />
+                  {/* Wide transparent hit area — ~20 px makes clicking easy */}
+                  <Polyline
+                    positions={seg.coords}
+                    pathOptions={{
+                      color: layer.color,
+                      weight: 20,
+                      opacity: 0.001, // not 0: SVG needs >0 to fire pointer events
+                      lineCap: "round",
+                    }}
+                    eventHandlers={{
+                      mouseover: (e) => { e.target.setStyle({ opacity: 0.12 }); },
+                      mouseout:  (e) => { e.target.setStyle({ opacity: 0.001 }); },
+                    }}
+                  >
+                    <Popup>
+                      <WallPopupContent meta={seg.meta} statusLabel={statusLabel} />
+                    </Popup>
+                  </Polyline>
+                </Fragment>
+              );
+            });
           })}
           {markerIcon.current &&
             videos.map((video) => (
