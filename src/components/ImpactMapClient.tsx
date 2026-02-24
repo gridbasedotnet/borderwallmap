@@ -6,11 +6,119 @@ import {
   TileLayer,
   Marker,
   Popup,
+  Polyline,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
 import { getSupabase, ImpactVideo } from "@/lib/supabase";
 import VideoModal from "./VideoModal";
+
+// Approximate planned border wall route for the Big Bend area
+// Based on CBP Smart Wall Map: cbp.gov/border-security/along-us-borders/smart-wall-map
+// Big Bend 4 project: 111 miles through Big Bend National Park
+// Coordinates follow the Rio Grande (US-Mexico border) — approximate
+const PLANNED_ROUTES: [number, number][][] = [
+  // Fort Quitman → Colorado Canyon (Hudspeth/Presidio counties)
+  [
+    [30.051, -105.044],
+    [29.850, -104.780],
+    [29.638, -104.512],
+    [29.450, -104.033],
+    [29.432, -103.961],
+    [29.430, -103.780],
+  ],
+  // Colorado Canyon (Big Bend Ranch SP) → Santa Elena Canyon (Big Bend NP)
+  [
+    [29.430, -103.780],
+    [29.371, -103.770],
+    [29.300, -103.720],
+    [29.250, -103.680],
+    [29.207, -103.652],
+    [29.166, -103.617],
+  ],
+  // Big Bend 4: Santa Elena Canyon → Boquillas Canyon (Big Bend NP)
+  [
+    [29.166, -103.617],
+    [29.140, -103.552],
+    [29.089, -103.453],
+    [29.068, -103.370],
+    [29.082, -103.273],
+    [29.114, -103.219],
+    [29.140, -103.192],
+    [29.150, -103.133],
+    [29.165, -103.060],
+    [29.182, -102.971],
+    [29.185, -102.916],
+  ],
+];
+
+function buildLegendHTML(): string {
+  const solid = (color: string) =>
+    `<div style="width:28px;height:3px;background:${color};border-radius:2px;flex-shrink:0;"></div>`;
+  const dashed = (color: string) =>
+    `<div style="width:28px;height:0;border-top:3px dashed ${color};flex-shrink:0;"></div>`;
+  const dotted = (color: string) =>
+    `<div style="display:flex;gap:3px;align-items:center;width:28px;flex-shrink:0;">` +
+    `<div style="width:5px;height:5px;border-radius:50%;background:${color};"></div>`.repeat(3) +
+    `</div>`;
+  const item = (lineHTML: string, label: string) =>
+    `<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">${lineHTML}<span style="color:rgba(255,255,255,0.82);font-size:11.5px;line-height:1.3;">${label}</span></div>`;
+
+  return `
+    <div style="color:white;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+      <div style="color:rgba(255,255,255,0.45);font-size:9.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Border Wall Status</div>
+      ${item(solid('#A0A0A0'), 'Existing Primary Barrier')}
+      ${item(solid('#C8BEB4'), 'Existing Secondary Barrier')}
+      ${item(dashed('#FF9500'), 'Planned')}
+      ${item(solid('#FFD44A'), 'Awarded')}
+      ${item(solid('#E06C1C'), 'Under Construction')}
+      ${item(solid('#5EA34B'), 'Completed (since 1/20/25)')}
+      <div style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.08);">
+        ${item(dotted('#6FA8DC'), 'Detection Technology')}
+      </div>
+      <div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="color:rgba(255,255,255,0.28);font-size:9px;line-height:1.5;">
+          Source: CBP Smart Wall Map<br>Route data is approximate
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function LegendControl() {
+  const map = useMap();
+
+  useEffect(() => {
+    const LegendClass = L.Control.extend({
+      onAdd() {
+        const container = L.DomUtil.create("div", "border-wall-legend");
+        container.style.cssText = `
+          background: rgba(13, 11, 9, 0.9);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          padding: 14px 16px;
+          min-width: 205px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+          margin: 12px;
+        `;
+        container.innerHTML = buildLegendHTML();
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+        return container;
+      },
+    });
+
+    const legend = new LegendClass({ position: "bottomleft" });
+    legend.addTo(map);
+    return () => {
+      legend.remove();
+    };
+  }, [map]);
+
+  return null;
+}
 
 function createMarkerIcon(): L.DivIcon {
   return L.divIcon({
@@ -115,6 +223,20 @@ export default function ImpactMapClient() {
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
           <FitBounds videos={videos} />
+          <LegendControl />
+          {PLANNED_ROUTES.map((route, i) => (
+            <Polyline
+              key={`planned-${i}`}
+              positions={route}
+              pathOptions={{
+                color: "#FF9500",
+                weight: 3,
+                dashArray: "8, 6",
+                opacity: 0.85,
+                lineCap: "butt",
+              }}
+            />
+          ))}
           {markerIcon.current &&
             videos.map((video) => (
               <Marker
