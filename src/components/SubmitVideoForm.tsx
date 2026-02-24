@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion } from "framer-motion";
 import { Upload, Mail, CheckCircle, AlertTriangle, Film } from "lucide-react";
-import { getSupabase } from "@/lib/supabase";
 
 const MAX_FILE_SIZE_GB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_GB * 1024 * 1024 * 1024;
@@ -13,10 +11,6 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024 * 1024)
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-}
-
-function sanitizeForPath(email: string): string {
-  return email.replace(/[^a-zA-Z0-9@._-]/g, "_");
 }
 
 export default function SubmitVideoForm() {
@@ -50,20 +44,20 @@ export default function SubmitVideoForm() {
     setError(null);
     setProgress(0);
 
-    const sanitizedEmail = sanitizeForPath(email);
-    const timestamp = Date.now();
-    const path = `${sanitizedEmail}/${timestamp}_${file.name}`;
-
     try {
-      const { error: uploadError } = await getSupabase().storage
-        .from("user-submissions")
-        .upload(path, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("email", email);
 
-      if (uploadError) {
-        throw uploadError;
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Upload failed. Please try again.");
       }
 
       setSuccess(true);
@@ -82,14 +76,14 @@ export default function SubmitVideoForm() {
 
   if (success) {
     return (
-      <div className="bg-taupe-950 border border-taupe-900 rounded-xl p-8 text-center">
+      <div className="text-center py-4">
         <CheckCircle size={48} className="text-canyon-500 mx-auto mb-4" />
         <h3 className="text-white text-xl font-semibold mb-2">
           Video submitted!
         </h3>
         <p className="text-taupe-400 text-sm max-w-md mx-auto mb-6">
           Thank you for your contribution. Our team will review your footage and
-          reach out to you at the email you provided if your video is selected or
+          reach out at the email you provided if your video is selected or
           if we have any questions.
         </p>
         <button
