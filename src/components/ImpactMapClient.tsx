@@ -87,13 +87,13 @@ export default function ImpactMapClient() {
 
   if (!mounted) {
     return (
-      <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-xl bg-taupe-950 animate-pulse" />
+      <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-2xl glass animate-pulse" />
     );
   }
 
   if (error) {
     return (
-      <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-xl bg-taupe-950 border border-taupe-900 flex items-center justify-center px-4">
+      <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-2xl glass glass-glow flex items-center justify-center px-4">
         <p className="text-taupe-400 text-base text-center">{error}</p>
       </div>
     );
@@ -101,7 +101,7 @@ export default function ImpactMapClient() {
 
   return (
     <>
-      <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-xl overflow-hidden border border-taupe-900">
+      <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-2xl overflow-hidden glass glass-glow">
         <MapContainer
           center={[29.19, -103.3]}
           zoom={9}
@@ -158,10 +158,12 @@ export default function ImpactMapClient() {
                       style={{
                         width: "100%",
                         padding: "12px 16px",
-                        backgroundColor: "#c45a3a",
+                        background: "rgba(196, 90, 58, 0.25)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
                         color: "#ffffff",
-                        border: "none",
-                        borderRadius: "8px",
+                        border: "1px solid rgba(196, 90, 58, 0.3)",
+                        borderRadius: "10px",
                         fontSize: "14px",
                         fontWeight: "500",
                         cursor: "pointer",
@@ -169,15 +171,17 @@ export default function ImpactMapClient() {
                         alignItems: "center",
                         justifyContent: "center",
                         gap: "6px",
-                        transition: "background-color 0.2s",
+                        transition: "all 0.2s",
                         WebkitTapHighlightColor: "transparent",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#d97050")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#c45a3a")
-                      }
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "rgba(196, 90, 58, 0.4)";
+                        e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.5)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "rgba(196, 90, 58, 0.25)";
+                        e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.3)";
+                      }}
                     >
                       <svg
                         width="16"

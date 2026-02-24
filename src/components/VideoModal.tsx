@@ -45,7 +45,7 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/90 sm:bg-black/85 backdrop-blur-sm"
+        className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}
@@ -71,7 +71,7 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
           </div>
 
           {hasError ? (
-            <div className="bg-taupe-950 border-t sm:border border-taupe-900 sm:rounded-xl p-6 sm:p-12 flex flex-col items-center gap-4 text-center">
+            <div className="glass-strong glass-glow rounded-t-2xl sm:rounded-2xl p-6 sm:p-12 flex flex-col items-center gap-4 text-center">
               <AlertTriangle size={40} className="text-canyon-500" />
               <p className="text-white text-base font-medium">
                 Video unavailable
@@ -83,19 +83,19 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
               <a
                 href={fullUrl}
                 download
-                className="mt-2 inline-flex items-center gap-2 px-5 py-3 min-h-[44px] bg-canyon-600 hover:bg-canyon-500 active:bg-canyon-500 text-white rounded-lg transition-colors text-sm"
+                className="mt-2 inline-flex items-center gap-2 px-5 py-3 min-h-[44px] glass glass-glow-canyon bg-canyon-600/20 hover:bg-canyon-600/30 active:bg-canyon-600/30 text-white rounded-xl transition-all text-sm"
               >
                 <Download size={16} />
                 Download Video
               </a>
             </div>
           ) : (
-            <div className="bg-black sm:rounded-xl overflow-hidden">
+            <div className="sm:rounded-2xl overflow-hidden glass-glow">
               <video
                 controls
                 autoPlay
                 playsInline
-                className="w-full max-h-[70vh] sm:max-h-[75vh]"
+                className="w-full max-h-[70vh] sm:max-h-[75vh] bg-black"
                 onError={() => setHasError(true)}
               >
                 <source src={fullUrl} type="video/mp4" />

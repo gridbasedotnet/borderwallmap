@@ -10,7 +10,7 @@ import InfoModal from "./InfoModal";
 const ImpactMapClient = dynamic(() => import("./ImpactMapClient"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-xl bg-taupe-950 animate-pulse" />
+    <div className="w-full h-[65vh] min-h-[350px] max-h-[600px] rounded-2xl glass animate-pulse" />
   ),
 });
 
@@ -57,7 +57,7 @@ export default function SeeTheImpactContent() {
         </button>
         <Link
           href="/submit"
-          className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] bg-canyon-600 hover:bg-canyon-500 active:bg-canyon-500 text-white rounded-lg transition-colors text-sm font-medium"
+          className="flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] glass glass-glow-canyon bg-canyon-600/20 hover:bg-canyon-600/30 active:bg-canyon-600/30 text-white rounded-xl transition-all text-sm font-medium"
         >
           <Upload size={15} />
           Submit Video

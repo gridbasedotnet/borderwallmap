@@ -10,7 +10,7 @@ export default function Footer() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="border-t border-taupe-900 py-8 px-4"
+      className="border-t border-white/[0.06] py-8 px-4"
     >
       <div className="max-w-5xl mx-auto flex flex-col items-center gap-3">
         <p className="text-taupe-400 text-sm">
@@ -21,7 +21,7 @@ export default function Footer() {
           href="https://www.nobigbendwall.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-taupe-500 hover:text-canyon-500 active:text-canyon-500 text-xs transition-colors min-h-[44px]"
+          className="inline-flex items-center gap-1 text-taupe-500 hover:text-canyon-400 active:text-canyon-400 text-xs transition-colors min-h-[44px]"
         >
           nobigbendwall.com
           <ExternalLink size={12} />

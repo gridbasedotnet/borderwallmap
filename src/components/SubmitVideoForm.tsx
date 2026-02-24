@@ -77,7 +77,7 @@ export default function SubmitVideoForm() {
   if (success) {
     return (
       <div className="text-center py-4">
-        <CheckCircle size={48} className="text-canyon-500 mx-auto mb-4" />
+        <CheckCircle size={48} className="text-canyon-400 mx-auto mb-4" />
         <h3 className="text-white text-xl font-semibold mb-2">
           Video submitted!
         </h3>
@@ -88,7 +88,7 @@ export default function SubmitVideoForm() {
         </p>
         <button
           onClick={() => setSuccess(false)}
-          className="px-6 py-3 min-h-[44px] bg-canyon-600 hover:bg-canyon-500 active:bg-canyon-500 text-white rounded-lg transition-colors text-sm font-medium"
+          className="px-6 py-3 min-h-[44px] glass glass-glow-canyon bg-canyon-600/20 hover:bg-canyon-600/30 active:bg-canyon-600/30 text-white rounded-xl transition-all text-sm font-medium"
         >
           Submit Another Video
         </button>
@@ -104,7 +104,7 @@ export default function SubmitVideoForm() {
           htmlFor="submit-email"
           className="block text-sm font-medium text-taupe-300 mb-1.5"
         >
-          Email address <span className="text-canyon-500">*</span>
+          Email address <span className="text-canyon-400">*</span>
         </label>
         <div className="relative">
           <Mail
@@ -118,7 +118,7 @@ export default function SubmitVideoForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full pl-10 pr-4 py-3 bg-taupe-950 border border-taupe-800 rounded-lg text-white placeholder:text-taupe-600 focus:outline-none focus:border-canyon-600 focus:ring-1 focus:ring-canyon-600 transition-colors text-base sm:text-sm"
+            className="w-full pl-10 pr-4 py-3 glass rounded-xl text-white placeholder:text-taupe-600 focus:outline-none focus:ring-1 focus:ring-canyon-600/50 transition-all text-base sm:text-sm"
           />
         </div>
         <p className="mt-1 text-xs text-taupe-500">
@@ -130,11 +130,11 @@ export default function SubmitVideoForm() {
       {/* File Upload */}
       <div>
         <label className="block text-sm font-medium text-taupe-300 mb-1.5">
-          Video file <span className="text-canyon-500">*</span>
+          Video file <span className="text-canyon-400">*</span>
         </label>
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-taupe-800 hover:border-taupe-600 rounded-lg p-6 text-center cursor-pointer transition-colors"
+          className="border-2 border-dashed border-white/[0.07] hover:border-white/[0.15] rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-white/[0.02]"
         >
           <input
             ref={fileInputRef}
@@ -145,7 +145,7 @@ export default function SubmitVideoForm() {
           />
           {file ? (
             <div className="flex items-center justify-center gap-3">
-              <Film size={24} className="text-canyon-500" />
+              <Film size={24} className="text-canyon-400" />
               <div className="text-left">
                 <p className="text-white text-sm font-medium">{file.name}</p>
                 <p className="text-taupe-500 text-xs">
@@ -169,7 +169,7 @@ export default function SubmitVideoForm() {
 
       {/* Error */}
       {error && (
-        <div className="flex items-start gap-2 p-3 bg-canyon-900/30 border border-canyon-800/50 rounded-lg">
+        <div className="flex items-start gap-2 p-3 glass rounded-xl bg-canyon-900/20">
           <AlertTriangle size={16} className="text-canyon-400 mt-0.5 shrink-0" />
           <p className="text-canyon-300 text-sm">{error}</p>
         </div>
@@ -179,7 +179,7 @@ export default function SubmitVideoForm() {
       <button
         type="submit"
         disabled={!file || !email || uploading}
-        className="w-full py-3.5 min-h-[48px] bg-canyon-600 hover:bg-canyon-500 active:bg-canyon-500 disabled:bg-taupe-800 disabled:text-taupe-500 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+        className="w-full py-3.5 min-h-[48px] glass glass-glow-canyon bg-canyon-600/25 hover:bg-canyon-600/35 active:bg-canyon-600/35 disabled:bg-white/[0.03] disabled:text-taupe-500 disabled:shadow-none disabled:border-white/[0.05] text-white rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2"
       >
         {uploading ? (
           <>
