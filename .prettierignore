@@ -1,0 +1,21 @@
+# Build outputs
+.next/
+out/
+build/
+
+# Dependencies
+node_modules/
+
+# Generated / large data files
+src/lib/wall_routes.ts
+
+# iOS native project
+ios/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Env files
+.env*
