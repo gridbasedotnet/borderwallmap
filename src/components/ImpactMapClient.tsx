@@ -369,7 +369,7 @@ export default function ImpactMapClient() {
                       mouseout:  (e) => { e.target.setStyle({ opacity: 0.001 }); },
                     }}
                   >
-                    <Popup>
+                    <Popup minWidth={180}>
                       <WallPopupContent meta={seg.meta} statusLabel={statusLabel} />
                     </Popup>
                   </Polyline>
@@ -384,11 +384,9 @@ export default function ImpactMapClient() {
                 position={[group.latitude, group.longitude]}
                 icon={markerIcon.current!}
               >
-                <Popup>
+                <Popup minWidth={200} maxWidth={260}>
                   <div
                     style={{
-                      minWidth: "180px",
-                      maxWidth: "260px",
                       padding: "2px",
                     }}
                   >
