@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, Fragment } from "react";
+import { useEffect, useState, useRef, useMemo, Fragment } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -225,12 +225,38 @@ function PoiLabels() {
   return null;
 }
 
+// ── Group co-located videos into single markers ────────────────────────────
+interface VideoGroup {
+  key: string;
+  latitude: number;
+  longitude: number;
+  videos: ImpactVideo[];
+}
+
+function groupVideosByLocation(videos: ImpactVideo[]): VideoGroup[] {
+  const groups = new Map<string, VideoGroup>();
+  for (const video of videos) {
+    const key = `${video.latitude.toFixed(3)}_${video.longitude.toFixed(3)}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        latitude: video.latitude,
+        longitude: video.longitude,
+        videos: [],
+      });
+    }
+    groups.get(key)!.videos.push(video);
+  }
+  return Array.from(groups.values());
+}
+
 export default function ImpactMapClient() {
   const [videos, setVideos] = useState<ImpactVideo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [activeVideo, setActiveVideo] = useState<ImpactVideo | null>(null);
   const markerIcon = useRef<L.DivIcon | null>(null);
+  const videoGroups = useMemo(() => groupVideosByLocation(videos), [videos]);
 
   useEffect(() => {
     setMounted(true);
@@ -339,10 +365,10 @@ export default function ImpactMapClient() {
             });
           })}
           {markerIcon.current &&
-            videos.map((video) => (
+            videoGroups.map((group) => (
               <Marker
-                key={video.id}
-                position={[video.latitude, video.longitude]}
+                key={group.key}
+                position={[group.latitude, group.longitude]}
                 icon={markerIcon.current!}
               >
                 <Popup>
@@ -353,69 +379,66 @@ export default function ImpactMapClient() {
                       padding: "2px",
                     }}
                   >
-                    <h3
-                      style={{
-                        color: "#ffffff",
-                        fontSize: "15px",
-                        fontWeight: "600",
-                        margin: "0 0 4px 0",
-                        lineHeight: "1.3",
-                      }}
-                    >
-                      {video.title}
-                    </h3>
-                    {video.description && (
-                      <p
-                        style={{
-                          color: "#a89a8a",
-                          fontSize: "13px",
-                          margin: "0 0 8px 0",
-                          lineHeight: "1.4",
-                        }}
-                      >
-                        {video.description}
-                      </p>
+                    {group.videos.length === 1 ? (
+                      /* ── Single video ── */
+                      <>
+                        <h3 style={{ color: "#ffffff", fontSize: "15px", fontWeight: "600", margin: "0 0 4px 0", lineHeight: "1.3" }}>
+                          {group.videos[0].title}
+                        </h3>
+                        {group.videos[0].description && (
+                          <p style={{ color: "#a89a8a", fontSize: "13px", margin: "0 0 8px 0", lineHeight: "1.4" }}>
+                            {group.videos[0].description}
+                          </p>
+                        )}
+                        <button
+                          onClick={() => setActiveVideo(group.videos[0])}
+                          style={{
+                            width: "100%", padding: "12px 16px",
+                            background: "rgba(196, 90, 58, 0.25)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+                            color: "#ffffff", border: "1px solid rgba(196, 90, 58, 0.3)", borderRadius: "10px",
+                            fontSize: "14px", fontWeight: "500", cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                            transition: "all 0.2s", WebkitTapHighlightColor: "transparent",
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196, 90, 58, 0.4)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.5)"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(196, 90, 58, 0.25)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.3)"; }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21" /></svg>
+                          Play Video
+                        </button>
+                      </>
+                    ) : (
+                      /* ── Multiple co-located videos ── */
+                      <>
+                        {group.videos[0].description && (
+                          <p style={{ color: "#a89a8a", fontSize: "13px", margin: "0 0 8px 0", lineHeight: "1.4" }}>
+                            {group.videos[0].description}
+                          </p>
+                        )}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                          {group.videos.map((video) => (
+                            <button
+                              key={video.id}
+                              onClick={() => setActiveVideo(video)}
+                              style={{
+                                width: "100%", padding: "10px 14px",
+                                background: "rgba(196, 90, 58, 0.25)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+                                color: "#ffffff", border: "1px solid rgba(196, 90, 58, 0.3)", borderRadius: "10px",
+                                fontSize: "13px", fontWeight: "500", cursor: "pointer",
+                                display: "flex", alignItems: "center", gap: "8px",
+                                transition: "all 0.2s", WebkitTapHighlightColor: "transparent",
+                                textAlign: "left",
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196, 90, 58, 0.4)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.5)"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(196, 90, 58, 0.25)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.3)"; }}
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}><polygon points="5,3 19,12 5,21" /></svg>
+                              {video.title}
+                            </button>
+                          ))}
+                        </div>
+                      </>
                     )}
-                    <button
-                      onClick={() => setActiveVideo(video)}
-                      style={{
-                        width: "100%",
-                        padding: "12px 16px",
-                        background: "rgba(196, 90, 58, 0.25)",
-                        backdropFilter: "blur(8px)",
-                        WebkitBackdropFilter: "blur(8px)",
-                        color: "#ffffff",
-                        border: "1px solid rgba(196, 90, 58, 0.3)",
-                        borderRadius: "10px",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                        transition: "all 0.2s",
-                        WebkitTapHighlightColor: "transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "rgba(196, 90, 58, 0.4)";
-                        e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.5)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "rgba(196, 90, 58, 0.25)";
-                        e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.3)";
-                      }}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <polygon points="5,3 19,12 5,21" />
-                      </svg>
-                      Play Video
-                    </button>
                   </div>
                 </Popup>
               </Marker>
