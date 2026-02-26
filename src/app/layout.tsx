@@ -5,6 +5,7 @@ import NativeBridge from "@/components/NativeBridge";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://map.nobigbendwall.com";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -60,6 +61,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
+        {supabaseUrl && (
+          <link rel="preconnect" href={supabaseUrl} />
+        )}
+        <link rel="preconnect" href="https://a.basemaps.cartocdn.com" />
+        <link rel="preconnect" href="https://b.basemaps.cartocdn.com" />
+        <link rel="preconnect" href="https://c.basemaps.cartocdn.com" />
         {plausibleDomain && (
           <script
             defer
