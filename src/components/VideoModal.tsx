@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { X, AlertTriangle, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ImpactVideo, getFullVideoUrl } from "@/lib/supabase";
@@ -12,6 +12,8 @@ interface VideoModalProps {
 
 export default function VideoModal({ video, onClose }: VideoModalProps) {
   const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -33,6 +35,7 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
 
   useEffect(() => {
     setHasError(false);
+    setIsLoading(true);
   }, [video]);
 
   if (!video) return null;
@@ -90,18 +93,40 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
               </a>
             </div>
           ) : (
-            <div className="sm:rounded-2xl overflow-hidden glass-glow">
+            <div className="relative sm:rounded-2xl overflow-hidden glass-glow">
               <video
+                ref={videoRef}
                 controls
                 autoPlay
                 playsInline
                 className="w-full max-h-[70vh] sm:max-h-[75vh] bg-black"
+                onCanPlay={() => setIsLoading(false)}
                 onError={() => setHasError(true)}
               >
                 <source src={fullUrl} type="video/mp4" />
                 <source src={fullUrl} type="video/quicktime" />
                 Your browser does not support the video tag.
               </video>
+              {isLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/95 gap-4">
+                  <div className="w-48 h-1 rounded-full overflow-hidden bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-canyon-500"
+                      style={{
+                        animation: "indeterminate 1.4s ease-in-out infinite",
+                      }}
+                    />
+                  </div>
+                  <p className="text-taupe-400 text-sm">Loading video...</p>
+                  <style>{`
+                    @keyframes indeterminate {
+                      0%   { width: 0%;  margin-left: 0; }
+                      50%  { width: 60%; margin-left: 20%; }
+                      100% { width: 0%;  margin-left: 100%; }
+                    }
+                  `}</style>
+                </div>
+              )}
             </div>
           )}
 

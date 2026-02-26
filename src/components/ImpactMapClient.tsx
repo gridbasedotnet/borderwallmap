@@ -10,9 +10,22 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
-import { getSupabase, ImpactVideo } from "@/lib/supabase";
+import { getSupabase, ImpactVideo, getFullVideoUrl } from "@/lib/supabase";
 import { WALL_ROUTE_LAYERS, WallSegmentMeta } from "@/lib/wall_routes";
 import VideoModal from "./VideoModal";
+
+// ── Preload a video on hover so playback starts faster ──────────────────────
+const _preloaded = new Set<string>();
+function preloadVideo(video: ImpactVideo) {
+  const url = getFullVideoUrl(video.video_url);
+  if (_preloaded.has(url)) return;
+  _preloaded.add(url);
+  const el = document.createElement("video");
+  el.preload = "auto";
+  el.src = url;
+  el.muted = true;
+  // browser will start fetching the first few MB in the background
+}
 
 // ── Popup content for a clicked wall segment ───────────────────────────────
 // CBP field names vary by layer; we try common variants.
@@ -400,7 +413,7 @@ export default function ImpactMapClient() {
                             display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
                             transition: "all 0.2s", WebkitTapHighlightColor: "transparent",
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196, 90, 58, 0.4)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.5)"; }}
+                          onMouseEnter={(e) => { preloadVideo(group.videos[0]); e.currentTarget.style.background = "rgba(196, 90, 58, 0.4)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.5)"; }}
                           onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(196, 90, 58, 0.25)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.3)"; }}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21" /></svg>
@@ -429,7 +442,7 @@ export default function ImpactMapClient() {
                                 transition: "all 0.2s", WebkitTapHighlightColor: "transparent",
                                 textAlign: "left",
                               }}
-                              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(196, 90, 58, 0.4)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.5)"; }}
+                              onMouseEnter={(e) => { preloadVideo(video); e.currentTarget.style.background = "rgba(196, 90, 58, 0.4)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.5)"; }}
                               onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(196, 90, 58, 0.25)"; e.currentTarget.style.borderColor = "rgba(196, 90, 58, 0.3)"; }}
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}><polygon points="5,3 19,12 5,21" /></svg>
