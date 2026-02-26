@@ -52,4 +52,18 @@ VALUES
     29.17, -103.60, NULL,
     '/storage/v1/object/public/videos/Santa Elena Canyon Vertical.MP4',
     NULL
+  ),
+  (
+    'Looking Down From Chisos (Vertical)',
+    'View looking down from the Chisos Mountains',
+    29.21484, -103.37737, NULL,
+    '/storage/v1/object/public/videos/Looking Down From Chisos Vertical.mp4',
+    '2026-02-24T19:19:30Z'
+  ),
+  (
+    'Santa Elena Canyon Area',
+    'Santa Elena Canyon area along the Rio Grande',
+    29.15721, -103.59902, NULL,
+    '/storage/v1/object/public/videos/Santa Elena Canyon Area.mp4',
+    '2026-02-24T19:51:54Z'
   );
