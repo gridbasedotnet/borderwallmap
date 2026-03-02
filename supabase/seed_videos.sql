@@ -66,4 +66,11 @@ VALUES
     29.15721, -103.59902, NULL,
     '/storage/v1/object/public/videos/Santa Elena Canyon Area.mp4',
     '2026-02-24T19:51:54Z'
+  ),
+  (
+    'Hot Springs Canyon',
+    'Hot Springs Canyon along the Rio Grande',
+    29.18529, -102.98219, 557.38,
+    '/storage/v1/object/public/videos/hotspringscanyon.mp4',
+    NULL
   );
