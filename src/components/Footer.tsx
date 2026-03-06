@@ -19,12 +19,12 @@ export default function Footer() {
           <span className="font-bold text-canyon-500">WALL</span>
         </p>
         <a
-          href="https://www.nobigbendwall.com"
+          href="https://www.defendbigbend.com"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-taupe-500 hover:text-canyon-400 active:text-canyon-400 text-xs transition-colors min-h-[44px]"
         >
-          nobigbendwall.com
+          defendbigbend.com
           <ExternalLink size={12} />
         </a>
         <div className="flex items-center gap-4">

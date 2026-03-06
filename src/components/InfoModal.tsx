@@ -107,12 +107,12 @@ export default function InfoModal({ open, onClose }: InfoModalProps) {
             </div>
 
             <a
-              href="https://www.nobigbendwall.com"
+              href="https://www.defendbigbend.com"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-canyon-400 hover:text-canyon-300 active:text-canyon-300 text-sm font-medium transition-colors min-h-[44px]"
             >
-              Learn more at nobigbendwall.com
+              Learn more at defendbigbend.com
               <ExternalLink size={14} />
             </a>
           </motion.div>

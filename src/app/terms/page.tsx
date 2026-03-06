@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 export const metadata = {
   title: "Terms of Service | No Big Bend Wall",
   description:
-    "Terms of service for nobigbendwall.com.",
+    "Terms of service for defendbigbend.com.",
 };
 
 export default function TermsPage() {
@@ -34,7 +34,7 @@ export default function TermsPage() {
                 1. Acceptance of Terms
               </h2>
               <p>
-                By accessing or using the website located at nobigbendwall.com
+                By accessing or using the website located at defendbigbend.com
                 (the &quot;Site&quot;), operated by No Big Bend Wall
                 (&quot;We,&quot; &quot;Us,&quot; or &quot;Our&quot;), you
                 (&quot;You&quot; or &quot;User&quot;) agree to be bound by these
@@ -259,10 +259,10 @@ export default function TermsPage() {
               <p>
                 For questions about these Terms, contact us at{" "}
                 <a
-                  href="mailto:hello@nobigbendwall.com"
+                  href="mailto:hello@defendbigbend.com"
                   className="text-canyon-400 hover:underline"
                 >
-                  hello@nobigbendwall.com
+                  hello@defendbigbend.com
                 </a>
                 .
               </p>
