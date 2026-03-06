@@ -8,6 +8,7 @@ import { Info, Upload } from "lucide-react";
 import InfoModal from "./InfoModal";
 import EmailCTA from "./EmailCTA";
 import ScrollingMarquee from "./ScrollingMarquee";
+import BreakingNewsBanner from "./BreakingNewsBanner";
 import { useGyroscope } from "@/hooks/useGyroscope";
 
 const ImpactMapClient = dynamic(() => import("./ImpactMapClient"), {
@@ -44,6 +45,9 @@ export default function SeeTheImpactContent() {
   return (
     <main className="relative min-h-screen bg-[#0d0b09]">
       <ScrollingMarquee />
+
+      {/* Breaking News */}
+      <BreakingNewsBanner />
 
       {/* Hero */}
       <motion.section
