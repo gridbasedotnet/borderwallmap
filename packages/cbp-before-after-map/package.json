@@ -1,0 +1,14 @@
+{
+  "name": "cbp-before-after-map",
+  "version": "1.0.0",
+  "description": "Before/after slider comparing removed CBP border wall routes (March 2026)",
+  "private": true,
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "leaflet": ">=1.9"
+  },
+  "devDependencies": {
+    "@types/leaflet": ">=1.9"
+  }
+}
