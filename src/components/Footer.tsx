@@ -42,6 +42,17 @@ export default function Footer() {
             Terms of Service
           </Link>
         </div>
+        <p className="text-taupe-600 text-xs">
+          Designed by{" "}
+          <a
+            href="https://intelstrategies.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-taupe-500 hover:text-taupe-400 active:text-taupe-400 transition-colors"
+          >
+            Intel Strategies LLC
+          </a>
+        </p>
       </div>
     </motion.footer>
   );
