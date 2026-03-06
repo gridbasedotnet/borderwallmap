@@ -4,7 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import NativeBridge from "@/components/NativeBridge";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://map.nobigbendwall.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://map.defendbigbend.com";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
 export const metadata: Metadata = {

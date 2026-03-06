@@ -1,8 +1,8 @@
 # borderwallmap — See the Impact
 
 Interactive map of GPS-tagged field footage from Big Bend National Park.
-Live site: **[map.nobigbendwall.com](https://map.nobigbendwall.com)**
-Campaign site: [nobigbendwall.com](https://www.nobigbendwall.com)
+Live site: **[map.defendbigbend.com](https://map.defendbigbend.com)**
+Campaign site: [defendbigbend.com](https://www.defendbigbend.com)
 
 ---
 
@@ -122,7 +122,7 @@ Set these in your hosting provider's dashboard for production:
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Your Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon/public API key |
 | `SUPABASE_SERVICE_ROLE_KEY` | No | Service role key (server-side only, not needed for static export) |
-| `NEXT_PUBLIC_SITE_URL` | Yes | Canonical URL, e.g. `https://map.nobigbendwall.com` |
+| `NEXT_PUBLIC_SITE_URL` | Yes | Canonical URL, e.g. `https://map.defendbigbend.com` |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | No | Plausible domain to enable analytics (see [Analytics Toggle](#analytics-toggle)) |
 
 ---
@@ -250,7 +250,7 @@ To send welcome or update emails, connect your Supabase project to an email prov
 - **Resend** — add a Supabase webhook on `petitions` INSERT that calls a Resend API endpoint.
 - **SendGrid / Mailchimp** — use a Supabase Edge Function or Zapier to sync new rows.
 
-Contact email for the campaign: **hello@nobigbendwall.com**
+Contact email for the campaign: **hello@defendbigbend.com**
 
 ---
 
@@ -286,7 +286,7 @@ Set the environment variable to your Plausible site domain:
 
 ```bash
 # .env.local
-NEXT_PUBLIC_PLAUSIBLE_DOMAIN=map.nobigbendwall.com
+NEXT_PUBLIC_PLAUSIBLE_DOMAIN=map.defendbigbend.com
 ```
 
 The script tag is injected automatically in `src/app/layout.tsx` when this variable is set.
@@ -340,7 +340,7 @@ Replace the Plausible `<script>` block in `layout.tsx` with your GA4 snippet, ga
 - [ ] "Submit Video" email template verified
 - [ ] Privacy policy and Terms of Service reviewed by counsel
 - [ ] Footer links resolve correctly
-- [ ] "Learn more at nobigbendwall.com" link is current
+- [ ] "Learn more at defendbigbend.com" link is current
 
 ### Performance & QA
 
@@ -379,7 +379,7 @@ Replace `YOUR_HOST_IP` / `YOUR_CNAME_TARGET` with values from your hosting provi
 | `CNAME` | `www` | `your-site.netlify.app` | 3600 |
 | `CNAME` | `map` | `your-site.netlify.app` | 3600 |
 
-### Email (hello@nobigbendwall.com)
+### Email (hello@defendbigbend.com)
 
 Configure these in your DNS provider alongside the web records:
 
@@ -387,7 +387,7 @@ Configure these in your DNS provider alongside the web records:
 |---|---|---|---|
 | `MX` | `@` | Your mail provider's MX record | 10 |
 | `TXT` | `@` | `v=spf1 include:your-provider.com ~all` | — |
-| `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:hello@nobigbendwall.com` | — |
+| `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:hello@defendbigbend.com` | — |
 | `CNAME` | `mail._domainkey` | DKIM key from your mail provider | — |
 
 > Exact values depend on your email provider (Google Workspace, Fastmail, Resend, etc.).

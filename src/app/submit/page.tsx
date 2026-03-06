@@ -2,7 +2,7 @@ import { Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 
-const EMAIL = "hello@nobigbendwall.com";
+const EMAIL = "hello@defendbigbend.com";
 const SUBJECT = encodeURIComponent("Video Submission – Big Bend Impact Map");
 const BODY = encodeURIComponent(`Hi,
 
@@ -11,7 +11,7 @@ I'd like to submit video footage for the Big Bend Impact Map.
 Full name:
 How I'd like to be credited (attribution):
 
-I have read and agree to the Content License & Release at nobigbendwall.com/privacy.
+I have read and agree to the Content License & Release at defendbigbend.com/privacy.
 
 Description of footage:
 

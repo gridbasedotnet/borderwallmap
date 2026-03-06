@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://map.nobigbendwall.com/sitemap.xml
+Sitemap: https://map.defendbigbend.com/sitemap.xml

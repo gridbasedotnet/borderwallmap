@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 export const metadata = {
   title: "Privacy Policy | No Big Bend Wall",
   description:
-    "Privacy policy and content license for nobigbendwall.com, including terms for video submissions.",
+    "Privacy policy and content license for defendbigbend.com, including terms for video submissions.",
 };
 
 export default function PrivacyPage() {
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
                 Information We Collect
               </h2>
               <p>
-                No Big Bend Wall / nobigbendwall.com (&quot;We,&quot;
+                No Big Bend Wall / defendbigbend.com (&quot;We,&quot;
                 &quot;Us,&quot; or &quot;Our&quot;) collects only the
                 information you voluntarily provide when submitting video
                 footage or contacting us, which may include your name, email
@@ -79,10 +79,10 @@ export default function PrivacyPage() {
                 may request deletion of your personal information at any time by
                 emailing{" "}
                 <a
-                  href="mailto:hello@nobigbendwall.com"
+                  href="mailto:hello@defendbigbend.com"
                   className="text-canyon-400 hover:underline"
                 >
-                  hello@nobigbendwall.com
+                  hello@defendbigbend.com
                 </a>
                 .
               </p>
@@ -207,10 +207,10 @@ export default function PrivacyPage() {
                 For questions about this Privacy Policy or to request data
                 deletion, contact us at{" "}
                 <a
-                  href="mailto:hello@nobigbendwall.com"
+                  href="mailto:hello@defendbigbend.com"
                   className="text-canyon-400 hover:underline"
                 >
-                  hello@nobigbendwall.com
+                  hello@defendbigbend.com
                 </a>
                 .
               </p>

@@ -161,7 +161,7 @@ export default function EmailCTA() {
                 <p className="text-taupe-400 text-xs leading-relaxed">
                   To make sure our emails reach you, add{" "}
                   <span className="text-canyon-400 font-medium">
-                    hello@nobigbendwall.com
+                    hello@defendbigbend.com
                   </span>{" "}
                   to your contacts so we don&apos;t end up in spam.
                 </p>
